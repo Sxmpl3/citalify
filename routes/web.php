@@ -13,6 +13,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth', 'onboarding'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::post('/dashboard/horario', [DashboardController::class, 'updateSchedule'])->name('dashboard.schedule.update');
     Route::post('/dashboard/citas', [DashboardController::class, 'storeManual'])->name('dashboard.bookings.store');
     Route::delete('/dashboard/citas/{booking}', [DashboardController::class, 'cancel'])->name('dashboard.bookings.cancel');
 

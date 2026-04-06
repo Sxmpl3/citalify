@@ -12,8 +12,8 @@
         </div>
     </x-slot>
 
-    <div class="py-8" x-data="ownerAgenda('{{ auth()->user()->business_slug }}')" x-cloak>
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+    <div class="py-8" x-data="ownerAgenda('{{ auth()->user()->business_slug }}', '{{ auth()->user()->schedule_type }}')" x-cloak>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
             @if(session('success'))
                 <div class="bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl px-5 py-4 text-sm font-medium">
@@ -119,12 +119,12 @@
             </div>
 
             {{-- AGENDA INTERACTIVA --}}
-            <div class="flex items-center justify-between mt-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-8">
                 <div>
                     <h1 class="text-xl font-display font-bold text-slate-800">Vista rápida de tu agenda</h1>
                     <p class="text-sm text-slate-500 mt-0.5">Vista de {{ auth()->user()->booking_days_ahead }} días. Haz click en un día para ver y gestionar citas.</p>
                 </div>
-                <button @click="openAddModal = true" class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-md shadow-emerald-900/20 px-4 py-2 text-sm font-medium rounded-xl shrink-0 transition-transform hover:scale-105">
+                <button @click="openAddModal = true" class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-md shadow-emerald-900/20 px-4 py-2.5 text-sm font-medium rounded-xl shrink-0 transition-transform hover:scale-105 self-start sm:self-auto">
                     + Nueva cita
                 </button>
             </div>
@@ -148,7 +148,6 @@
                         <button
                             type="button"
                             @click="selectDay(day)"
-                            :disabled="day.status === 'closed'"
                             class="aspect-square rounded-xl flex flex-col items-center justify-center transition-all select-none relative"
                             :class="{
                                 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-sm': day.count > 0 && selectedDate !== day.date,
@@ -171,8 +170,15 @@
             {{-- Detalle del día seleccionado --}}
             <template x-if="selectedDate">
                 <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden relative">
-                    <div class="flex items-center justify-between px-5 py-4 border-b border-slate-50">
-                        <h2 class="font-display font-bold text-slate-800 text-base capitalize" x-text="formatDate(selectedDate)"></h2>
+                    <div class="flex items-center justify-between px-5 py-3 border-b border-slate-50">
+                        <div class="flex items-center gap-3">
+                            <h2 class="font-display font-bold text-slate-800 text-base capitalize" x-text="formatDate(selectedDate)"></h2>
+                            <template x-if="scheduleType === 'custom'">
+                                <button @click="openConfig()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-2.5 py-1 rounded-md font-medium transition-colors">
+                                    Configurar Horario
+                                </button>
+                            </template>
+                        </div>
                         <button type="button" @click="selectedDate = null; bookings = []" class="text-slate-400 hover:text-slate-600 transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
@@ -189,7 +195,7 @@
 
                     <div x-show="!loadingDay && bookings.length > 0" class="divide-y divide-slate-50">
                         <template x-for="b in bookings" :key="b.id">
-                            <div class="px-5 py-4 hover:bg-slate-50/60 transition-colors flex items-center justify-between gap-4">
+                            <div class="px-4 sm:px-5 py-4 hover:bg-slate-50/60 transition-colors flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                                 <div class="flex items-start gap-4 flex-1 min-w-0">
                                     <div class="text-center w-14 shrink-0 pt-0.5">
                                         <p class="text-base font-bold text-slate-700 tabular-nums leading-none" x-text="b.starts_at"></p>
@@ -207,7 +213,7 @@
                                         </template>
                                     </div>
                                 </div>
-                                <div class="shrink-0 flex flex-col items-end gap-2">
+                                <div class="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-2 pl-[4.5rem] sm:pl-0">
                                     <span x-show="b.status === 'confirmed'" class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700">Confirmada</span>
                                     <span x-show="b.status === 'pending'" class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700">Pendiente</span>
                                     
@@ -222,6 +228,45 @@
             </template>
 
             {{-- Modales --}}
+            <!-- Modal Configurar Horario Especial -->
+            <div x-show="openConfigModal" style="display: none;" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4" x-transition.opacity>
+                <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden" @click.outside="openConfigModal = false" x-transition>
+                    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                        <h3 class="font-bold text-lg text-slate-800">Horario del Día</h3>
+                        <button @click="openConfigModal = false" class="text-slate-400 hover:text-slate-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <form action="{{ route('dashboard.schedule.update') }}" method="POST" class="p-6 space-y-4">
+                        @csrf
+                        <input type="hidden" name="date" :value="selectedDate">
+                        
+                        <p class="text-sm font-medium text-slate-600 mb-2 capitalize" x-text="formatDate(selectedDate)"></p>
+                        
+                        <label class="flex items-center cursor-pointer gap-2 select-none mb-4">
+                            <div class="relative">
+                                <input type="checkbox" name="custom_open_checkbox" value="1" x-model="modalOpen" class="sr-only">
+                                <input type="hidden" name="is_closed" :value="modalOpen ? '0' : '1'">
+                                <div class="w-10 h-5 rounded-full transition-colors" :class="modalOpen ? 'bg-emerald-600' : 'bg-slate-300'"></div>
+                                <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform" :class="modalOpen ? 'translate-x-5' : 'translate-x-0'"></div>
+                            </div>
+                            <span class="text-sm font-medium" :class="modalOpen ? 'text-emerald-700' : 'text-gray-400'" x-text="modalOpen ? 'Abierto' : 'Cerrado'"></span>
+                        </label>
+
+                        <div x-show="modalOpen" class="flex items-center gap-2">
+                            <input type="time" name="open_time" x-model="modalOpenTime" class="rounded-xl border-slate-300 text-sm focus:border-emerald-500 w-full">
+                            <span class="text-gray-400 text-sm">a</span>
+                            <input type="time" name="close_time" x-model="modalCloseTime" class="rounded-xl border-slate-300 text-sm focus:border-emerald-500 w-full">
+                        </div>
+
+                        <div class="pt-2 flex justify-end gap-3 mt-6">
+                            <button type="button" @click="openConfigModal = false" class="px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition-colors">Cancelar</button>
+                            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 text-sm font-medium rounded-xl shadow-md transition-all">Guardar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <!-- Modal Añadir -->
             <div x-show="openAddModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4" x-transition.opacity>
                 <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden" @click.outside="openAddModal = false" x-transition>
@@ -330,14 +375,20 @@
     @push('scripts')
     <script>
         document.addEventListener('alpine:init', () => {
-            Alpine.data('ownerAgenda', (slug) => ({
+            Alpine.data('ownerAgenda', (slug, type) => ({
                 slug: slug,
+                scheduleType: type,
                 days: [],
                 loading: true,
                 selectedDate: null,
+                selectedDayRef: null,
                 bookings: [],
                 loadingDay: false,
                 openAddModal: false,
+                openConfigModal: false,
+                modalOpen: true,
+                modalOpenTime: '09:00',
+                modalCloseTime: '19:00',
                 bookingToCancel: null,
 
                 async init() {
@@ -354,10 +405,12 @@
                 async selectDay(day) {
                     if (this.selectedDate === day.date) {
                         this.selectedDate = null;
+                        this.selectedDayRef = null;
                         this.bookings = [];
                         return;
                     }
                     this.selectedDate = day.date;
+                    this.selectedDayRef = day;
                     this.loadingDay = true;
                     this.bookings = [];
                     try {
@@ -365,6 +418,14 @@
                         this.bookings = await res.json();
                     } catch (_) {}
                     this.loadingDay = false;
+                },
+                openConfig() {
+                    if (this.selectedDayRef) {
+                        this.modalOpen = this.selectedDayRef.status === 'open';
+                        this.modalOpenTime = this.selectedDayRef.open_time || '09:00';
+                        this.modalCloseTime = this.selectedDayRef.close_time || '19:00';
+                    }
+                    this.openConfigModal = true;
                 },
                 dayName(dateStr) {
                     return ['Do','Lu','Ma','Mi','Ju','Vi','Sá'][new Date(dateStr + 'T12:00:00').getDay()];

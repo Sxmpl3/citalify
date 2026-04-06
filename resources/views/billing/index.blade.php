@@ -8,7 +8,7 @@
     </x-slot>
 
     <div class="py-8">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {{-- Hoy --}}
@@ -64,7 +64,7 @@
                     </form>
                 </div>
 
-                <div class="p-6 bg-emerald-50/50 border-b border-slate-50 flex items-center justify-between">
+                <div class="p-5 sm:p-6 bg-emerald-50/50 border-b border-slate-50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div>
                         <p class="text-sm font-semibold text-emerald-800">Total en el periodo seleccionado</p>
                         <p class="text-xs text-emerald-600/80 mt-0.5">Basado en {{ $rangeBookings->count() }} citas confirmadas</p>
@@ -72,8 +72,29 @@
                     <p class="text-3xl font-display font-bold text-emerald-700">{{ number_format($rangeRevenue, 2, ',', '.') }} €</p>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm whitespace-nowrap">
+                {{-- Vista móvil: lista de tarjetas --}}
+                <div class="divide-y divide-slate-100 md:hidden">
+                    @forelse($rangeBookings as $b)
+                        <div class="px-4 py-3 flex items-center justify-between gap-3">
+                            <div class="min-w-0">
+                                <p class="text-sm font-semibold text-slate-800 truncate">{{ $b->customer_name }}</p>
+                                <p class="text-xs text-slate-400 mt-0.5 tabular-nums">
+                                    {{ \Carbon\Carbon::parse($b->starts_at)->timezone(auth()->user()->timezone ?? 'Europe/Madrid')->format('d/m/Y · H:i') }}
+                                </p>
+                            </div>
+                            <p class="text-sm font-bold text-slate-800 shrink-0 tabular-nums">{{ number_format($b->price, 2, ',', '.') }} €</p>
+                        </div>
+                    @empty
+                        <div class="py-12 px-4 text-center">
+                            <p class="text-slate-500 font-medium text-sm">No hay facturación registrada en este rango.</p>
+                            <p class="text-slate-400 text-xs mt-1">Gana dinero programando más citas para este periodo.</p>
+                        </div>
+                    @endforelse
+                </div>
+
+                {{-- Vista desktop: tabla completa --}}
+                <div class="hidden md:block overflow-x-auto">
+                    <table class="w-full text-left text-sm">
                         <thead class="text-slate-500 bg-slate-50 border-b border-slate-100">
                             <tr>
                                 <th class="py-3 px-6 font-semibold uppercase tracking-wider text-[11px]">Fecha y Hora</th>
@@ -85,7 +106,7 @@
                         <tbody class="divide-y divide-slate-50 text-slate-700">
                             @forelse($rangeBookings as $b)
                                 <tr class="hover:bg-slate-50/50 transition-colors">
-                                    <td class="py-4 px-6 font-medium text-slate-600">
+                                    <td class="py-4 px-6 font-medium text-slate-600 whitespace-nowrap">
                                         {{ \Carbon\Carbon::parse($b->starts_at)->timezone(auth()->user()->timezone ?? 'Europe/Madrid')->format('d/m/Y H:i') }}
                                     </td>
                                     <td class="py-4 px-6 font-medium">{{ $b->customer_name }}</td>
@@ -94,16 +115,13 @@
                                             {{ $b->service->name ?? 'Servicio eliminado' }}
                                         </span>
                                     </td>
-                                    <td class="py-4 px-6 text-right font-semibold text-slate-800">
+                                    <td class="py-4 px-6 text-right font-semibold text-slate-800 whitespace-nowrap">
                                         {{ number_format($b->price, 2, ',', '.') }} €
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
                                     <td colspan="4" class="py-12 px-6 text-center">
-                                        <div class="w-4 h-4 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-3">
-                                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                                        </div>
                                         <p class="text-slate-500 font-medium text-sm">No hay facturación registrada en este rango.</p>
                                         <p class="text-slate-400 text-xs mt-1">Gana dinero programando más citas para este periodo.</p>
                                     </td>

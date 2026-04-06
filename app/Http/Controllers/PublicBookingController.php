@@ -38,7 +38,15 @@ class PublicBookingController extends Controller
         $rangeEnd = $today->copy()->addDays($daysAhead);
 
         $employee  = $business->employees()->first();
-        $schedules = $employee ? $employee->schedules->keyBy('day_of_week') : collect();
+        
+        if ($business->schedule_type === 'custom') {
+            $schedules = $employee ? $employee->customSchedules()
+                ->where('date', '>=', $today->toDateString())
+                ->where('date', '<', $rangeEnd->toDateString())
+                ->get()->keyBy(fn($s) => $s->date->toDateString()) : collect();
+        } else {
+            $schedules = $employee ? $employee->schedules->keyBy('day_of_week') : collect();
+        }
 
         $bookings = $employee
             ? Booking::where('employee_id', $employee->id)
@@ -56,9 +64,31 @@ class PublicBookingController extends Controller
         for ($i = 0; $i < $daysAhead; $i++) {
             $date    = $today->copy()->addDays($i);
             $dateStr = $date->toDateString();
+            
+            $status = 'closed';
+            $openTime = '09:00';
+            $closeTime = '19:00';
+            if ($business->schedule_type === 'custom') {
+                $sch = $schedules->get($dateStr);
+                if ($sch) {
+                    if (!$sch->is_closed) $status = 'open';
+                    if ($sch->open_time) $openTime = Carbon::parse($sch->open_time)->format('H:i');
+                    if ($sch->close_time) $closeTime = Carbon::parse($sch->close_time)->format('H:i');
+                }
+            } else {
+                if ($schedules->has($date->dayOfWeek)) {
+                    $status = 'open';
+                    $sch = $schedules->get($date->dayOfWeek);
+                    $openTime = Carbon::parse($sch->open_time)->format('H:i');
+                    $closeTime = Carbon::parse($sch->close_time)->format('H:i');
+                }
+            }
+
             $days[]  = [
                 'date'   => $dateStr,
-                'status' => $schedules->has($date->dayOfWeek) ? 'open' : 'closed',
+                'status' => $status,
+                'open_time' => $openTime,
+                'close_time' => $closeTime,
                 'count'  => $byDate->get($dateStr, collect())->count(),
             ];
         }
@@ -128,7 +158,14 @@ class PublicBookingController extends Controller
         }
 
         // Precargar horarios y reservas del período
-        $schedules = $employee->schedules->keyBy('day_of_week');
+        if ($business->schedule_type === 'custom') {
+            $schedules = $employee->customSchedules()
+                ->where('date', '>=', $today->toDateString())
+                ->where('date', '<', $rangeEnd->toDateString())
+                ->get()->keyBy(fn($s) => $s->date->toDateString());
+        } else {
+            $schedules = $employee->schedules->keyBy('day_of_week');
+        }
 
         $bookings = Booking::where('employee_id', $employee->id)
             ->whereIn('status', ['pending', 'confirmed'])
@@ -141,11 +178,20 @@ class PublicBookingController extends Controller
 
         for ($i = 0; $i < $daysAhead; $i++) {
             $date      = $today->copy()->addDays($i);
-            $schedule  = $schedules->get($date->dayOfWeek);
-
-            if (!$schedule) {
-                $days[] = ['date' => $date->toDateString(), 'status' => 'closed'];
-                continue;
+            $dateStr   = $date->toDateString();
+            
+            if ($business->schedule_type === 'custom') {
+                $schedule = $schedules->get($dateStr);
+                if (!$schedule || $schedule->is_closed) {
+                    $days[] = ['date' => $dateStr, 'status' => 'closed'];
+                    continue;
+                }
+            } else {
+                $schedule  = $schedules->get($date->dayOfWeek);
+                if (!$schedule) {
+                    $days[] = ['date' => $dateStr, 'status' => 'closed'];
+                    continue;
+                }
             }
 
             $open   = Carbon::parse($date->toDateString() . ' ' . $schedule->open_time, $tz);
@@ -200,9 +246,17 @@ class PublicBookingController extends Controller
             return response()->json([]);
         }
 
-        $schedule = $employee->schedules()->where('day_of_week', $dayOfWeek)->first();
-        if (!$schedule) {
-            return response()->json([]);
+        $schedule = null;
+        if ($business->schedule_type === 'custom') {
+            $schedule = $employee->customSchedules()->where('date', $date->toDateString())->first();
+            if (!$schedule || $schedule->is_closed) {
+                return response()->json([]);
+            }
+        } else {
+            $schedule = $employee->schedules()->where('day_of_week', $dayOfWeek)->first();
+            if (!$schedule) {
+                return response()->json([]);
+            }
         }
 
         $open     = Carbon::parse($date->toDateString() . ' ' . $schedule->open_time, $tz);

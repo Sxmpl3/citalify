@@ -25,6 +25,11 @@ class Employee extends Model
         return $this->hasMany(Schedule::class);
     }
 
+    public function customSchedules(): HasMany
+    {
+        return $this->hasMany(CustomSchedule::class);
+    }
+
     public function scheduleBlocks(): HasMany
     {
         return $this->hasMany(ScheduleBlock::class);

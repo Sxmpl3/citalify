@@ -102,4 +102,31 @@ class DashboardController extends Controller
 
         return back()->with('success', 'Cita cancelada correctamente.');
     }
+
+    public function updateSchedule(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $user = auth()->user();
+        abort_if($user->schedule_type !== 'custom', 400, 'Solo disponible en Horario Especial');
+
+        $data = $request->validate([
+            'date' => ['required', 'date'],
+            'is_closed' => ['required', 'boolean'],
+            'open_time' => ['nullable', 'date_format:H:i'],
+            'close_time' => ['nullable', 'date_format:H:i', 'after:open_time'],
+        ]);
+
+        $employee = $user->employees()->first();
+        if ($employee) {
+            $employee->customSchedules()->updateOrCreate(
+                ['date' => $data['date']],
+                [
+                    'is_closed' => $data['is_closed'],
+                    'open_time' => $data['is_closed'] ? null : ($data['open_time'] ?? null),
+                    'close_time' => $data['is_closed'] ? null : ($data['close_time'] ?? null),
+                ]
+            );
+        }
+
+        return back()->with('success', 'Horario actualizado para el día ' . $data['date']);
+    }
 }

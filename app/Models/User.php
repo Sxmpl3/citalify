@@ -30,6 +30,7 @@ class User extends Authenticatable
         'trial_ends_at',
         'onboarding_completed',
         'booking_days_ahead',
+        'schedule_type',
     ];
 
     protected $hidden = [
