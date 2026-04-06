@@ -98,6 +98,11 @@ class DashboardController extends Controller
             $blacklist->increment('strikes');
         }
 
+        if (!empty($booking->customer_email)) {
+            \Illuminate\Support\Facades\Mail::to($booking->customer_email)
+                ->send(new \App\Mail\BookingCancelledClientMail($booking, $user));
+        }
+
         $booking->delete();
 
         return back()->with('success', 'Cita cancelada correctamente.');
@@ -117,16 +122,50 @@ class DashboardController extends Controller
 
         $employee = $user->employees()->first();
         if ($employee) {
-            $employee->customSchedules()->updateOrCreate(
-                ['date' => $data['date']],
-                [
+            $formattedDate = \Carbon\Carbon::parse($data['date'])->toDateString();
+            $schedule = $employee->customSchedules()->whereDate('date', $formattedDate)->first();
+            $wasOpen = $schedule ? !$schedule->is_closed : true;
+            $isNowClosed = $data['is_closed'];
+
+            if ($schedule) {
+                $schedule->update([
                     'is_closed' => $data['is_closed'],
                     'open_time' => $data['is_closed'] ? null : ($data['open_time'] ?? null),
                     'close_time' => $data['is_closed'] ? null : ($data['close_time'] ?? null),
-                ]
-            );
+                ]);
+            } else {
+                $employee->customSchedules()->create([
+                    'date' => $formattedDate,
+                    'is_closed' => $data['is_closed'],
+                    'open_time' => $data['is_closed'] ? null : ($data['open_time'] ?? null),
+                    'close_time' => $data['is_closed'] ? null : ($data['close_time'] ?? null),
+                ]);
+            }
+
+            if ($wasOpen && $isNowClosed) {
+                $bookings = \App\Models\Booking::where('employee_id', $employee->id)
+                    ->whereDate('starts_at', $formattedDate)
+                    ->whereIn('status', ['pending', 'confirmed'])
+                    ->with('service')
+                    ->get();
+
+                if ($bookings->isNotEmpty()) {
+                    foreach ($bookings as $booking) {
+                        $booking->update(['status' => 'cancelled']);
+                        if (!empty($booking->customer_email)) {
+                            \Illuminate\Support\Facades\Mail::to($booking->customer_email)
+                                ->send(new \App\Mail\BookingCancelledClientMail($booking, $user));
+                        }
+                    }
+
+                    if (!empty($user->email)) {
+                        \Illuminate\Support\Facades\Mail::to($user->email)
+                            ->send(new \App\Mail\DayClosedOwnerSummaryMail($bookings, $user, $formattedDate));
+                    }
+                }
+            }
         }
 
-        return back()->with('success', 'Horario actualizado para el día ' . $data['date']);
+        return back()->with('success', 'Horario actualizado para el día ' . \Carbon\Carbon::parse($data['date'])->format('d/m/Y'));
     }
 }

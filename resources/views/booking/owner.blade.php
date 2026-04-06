@@ -74,11 +74,7 @@
 {{-- Header --}}
 <header class="bg-white/95 backdrop-blur-sm border-b border-slate-100 shadow-sm">
     <div class="max-w-lg mx-auto px-4 py-4 flex items-center gap-3">
-        <span class="w-9 h-9 rounded-xl flex items-center justify-center bg-gradient-to-br from-emerald-600 to-emerald-700 shrink-0">
-            <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-            </svg>
-        </span>
+        <img src="{{ asset('img/logo.png') }}" alt="Citalify Logo" class="h-9 w-auto rounded-xl">
         <div class="flex-1 min-w-0">
             <p class="font-display font-bold text-slate-800 leading-tight truncate">{{ $business->business_name }}</p>
             @if($business->address)
@@ -235,7 +231,7 @@
     </div>
 
     <p class="text-center text-xs text-slate-300 mt-8">
-        Gestionado con <a href="{{ route('dashboard') }}" class="text-emerald-500 font-medium hover:text-emerald-700">citalia</a>
+        Gestionado con <a href="{{ route('dashboard') }}" class="text-emerald-500 font-medium hover:text-emerald-700">citalify</a>
     </p>
 
 </main>

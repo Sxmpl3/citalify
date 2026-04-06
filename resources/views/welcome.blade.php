@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>citalia — Reservas online y recordatorios WhatsApp para tu negocio</title>
-    <meta name="description" content="Gestiona tus citas online y reduce los no-shows hasta un 60% con recordatorios automáticos por WhatsApp. Para peluquerías, clínicas, fisioterapeutas y más.">
+    <title>citalify — Reservas online y recordatorios WhatsApp para tu negocio</title>
+    <meta name="description" content="Gestiona tus citas online y reduce las ausencias hasta un 60% con recordatorios automáticos por WhatsApp. Para peluquerías, clínicas, fisioterapeutas y más.">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=dm-sans:400,500,600,700,800|outfit:600,700,800&display=swap" rel="stylesheet"/>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -216,15 +216,10 @@
 <body x-data="{ mobileMenuOpen: false }" class="scroll-smooth">
 
 {{-- NAVBAR --}}
-<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-slate-100 shadow-sm">
+<header class="sticky top-0 z-100 bg-white/95 backdrop-blur-xl border-b border-slate-100 shadow-sm">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16 lg:h-18">
-        <a href="/" class="flex items-center gap-2.5 group">
-            <span class="w-9 h-9 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105" style="background:linear-gradient(135deg, var(--brand), var(--brand-dark))">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-            </span>
-            <span class="text-xl font-display font-bold" style="color:var(--dark)">citalia</span>
+        <a href="{{ route('dashboard') }}" class="flex items-center gap-2 group">
+            <x-application-logo class="group-hover:opacity-90 transition-opacity" />
         </a>
         <nav class="hidden md:flex items-center gap-8">
             <a href="#como-funciona" class="nav-link">Cómo funciona</a>
@@ -277,7 +272,7 @@
 
         <p class="fade-up delay-2 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed" style="color:var(--muted)">
             Página de reservas propia, panel de agenda y recordatorios automáticos por WhatsApp.
-            Reduce los no-shows hasta un <strong class="text-slate-800">60%</strong> y olvídate de gestionar citas por teléfono.
+            Reduce las ausencias hasta un <strong class="text-slate-800">60%</strong> y olvídate de gestionar citas por teléfono.
         </p>
 
         <div class="fade-up delay-3 flex flex-col sm:flex-row gap-4 justify-center">
@@ -338,8 +333,8 @@
                 <div class="problem-icon">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
                 </div>
-                <h3 class="font-bold text-lg mb-2 text-slate-800">No-shows constantes</h3>
-                <p class="text-sm leading-relaxed text-slate-600">Con 2 no-shows a la semana y citas de 20€, pierdes <strong class="text-slate-800">más de 1.500€ al año</strong>. Sin posibilidad de recuperar ese hueco.</p>
+                <h3 class="font-bold text-lg mb-2 text-slate-800">Ausencias constantes</h3>
+                <p class="text-sm leading-relaxed text-slate-600">Con 2 ausencias a la semana y citas de 20€, pierdes <strong class="text-slate-800">más de 1.500€ al año</strong>. Sin posibilidad de recuperar ese hueco.</p>
             </div>
             <div class="problem-card">
                 <div class="problem-icon">
@@ -371,7 +366,7 @@
                 </div>
                 <h3 class="font-bold text-lg mb-2 text-slate-800">Página de reservas propia</h3>
                 <p class="text-sm leading-relaxed text-slate-600">
-                    Tu enlace personalizado <code class="text-xs px-2 py-1 rounded-lg font-mono bg-emerald-50 text-emerald-700">citalia.es/tu-negocio</code>. Tus clientes ven tu disponibilidad real y reservan en 30 segundos, sin llamarte.
+                    Tu enlace personalizado <code class="text-xs px-2 py-1 rounded-lg font-mono bg-emerald-50 text-emerald-700">citalify.es/tu-negocio</code>. Tus clientes ven tu disponibilidad real y reservan en 30 segundos, sin llamarte.
                 </p>
             </div>
             <div class="feature-card">
@@ -411,7 +406,7 @@
             @foreach([
                 ['01', 'Crea tu cuenta', 'Regístrate en 30 segundos. En el siguiente paso configuras el nombre de tu negocio, tus servicios y tu horario semanal.'],
                 ['02', 'Comparte tu enlace', 'Copia tu URL única y ponla en tu Instagram, en tu web o mándala por WhatsApp. Ellos ven tu disponibilidad real y reservan solos.'],
-                ['03', 'Recibe reservas y olvídate', 'citalia envía recordatorios automáticos por WhatsApp 24h antes. Si el cliente cancela, recibes un aviso al instante y el hueco queda libre.'],
+                ['03', 'Recibe reservas y olvídate', 'citalify envía recordatorios automáticos por WhatsApp 24h antes. Si el cliente cancela, recibes un aviso al instante y el hueco queda libre.'],
             ] as [$num, $title, $desc])
             <div class="flex gap-6 items-start group">
                 <div class="relative shrink-0 w-16 h-16 rounded-2xl flex items-center justify-center font-display font-bold text-xl bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-700 transition-all duration-300 group-hover:scale-105 group-hover:shadow-md">
@@ -431,7 +426,7 @@
 <section class="py-24 px-4 sm:px-6 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800">
     <div class="max-w-3xl mx-auto text-center">
         <p class="font-display mb-2 text-7xl sm:text-8xl font-bold text-white leading-none">60%</p>
-        <p class="text-xl mb-12 text-emerald-100">de reducción en no-shows con recordatorios automáticos</p>
+        <p class="text-xl mb-12 text-emerald-100">de reducción en ausencias con recordatorios automáticos</p>
         <div class="testimonial max-w-lg mx-auto text-left">
             <div class="flex gap-1 mb-4">
                 @for ($i=0;$i<5;$i++)
@@ -439,7 +434,7 @@
                 @endfor
             </div>
             <p class="text-lg sm:text-xl mb-4 text-white/95 leading-relaxed">
-                "Desde que uso citalia no tengo que estar pendiente del móvil. Los clientes reservan solos y casi nadie falla a la cita."
+                "Desde que uso citalify no tengo que estar pendiente del móvil. Los clientes reservan solos y casi nadie falla a la cita."
             </p>
             <p class="text-sm font-semibold text-white/60">— Carmen R., Peluquería en Madrid</p>
         </div>
@@ -487,7 +482,7 @@
                         Próximamente
                     </span>
                 </div>
-                <p class="text-sm mb-6 text-slate-600">Para negocios que quieren reducir no-shows</p>
+                <p class="text-sm mb-6 text-slate-600">Para negocios que quieren reducir ausencias</p>
                 <div class="mb-8">
                     <span class="font-display text-5xl font-bold text-slate-800">14,99€</span>
                     <span class="text-sm text-slate-500">/mes</span>
@@ -518,7 +513,7 @@
             <span class="text-emerald-400">2 horas a la semana?</span>
         </h2>
         <p class="text-lg mb-10 text-slate-400">
-            Con citalia dejas de gestionar citas por teléfono, reduces los no-shows y tienes control total de tu agenda. Desde 4,99€ al mes.
+            Con citalify dejas de gestionar citas por teléfono, reduces las ausencias y tienes control total de tu agenda. Desde 4,99€ al mes.
         </p>
         <a href="{{ route('register') }}" class="btn-primary inline-block px-10 py-4 text-lg rounded-xl">
             Prueba 30 días gratis
@@ -531,14 +526,10 @@
 <footer class="border-t border-slate-800 py-10 px-4 sm:px-6 bg-slate-900">
     <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
         <div class="flex items-center gap-2.5">
-            <span class="w-8 h-8 rounded-xl flex items-center justify-center bg-gradient-to-br from-emerald-600 to-emerald-700">
-                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                </svg>
-            </span>
-            <span class="font-display font-bold text-white text-lg">citalia</span>
+            <img src="{{ asset('img/logo.png') }}" alt="Citalify Logo" class="h-9 w-auto rounded-xl">
+            <span class="font-display font-bold text-white text-lg">citalify</span>
         </div>
-        <p class="text-sm text-slate-500">&copy; {{ date('Y') }} citalia. Todos los derechos reservados.</p>
+        <p class="text-sm text-slate-500">&copy; {{ date('Y') }} citalify. Todos los derechos reservados.</p>
         <div class="flex gap-6 text-sm text-slate-500">
             <a href="#" class="hover:text-white transition-colors">Privacidad</a>
             <a href="#" class="hover:text-white transition-colors">Términos</a>

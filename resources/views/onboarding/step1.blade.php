@@ -43,7 +43,7 @@
                 </label>
                 <div class="flex rounded-lg shadow-sm">
                     <span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-300 bg-slate-50 text-slate-500 text-sm">
-                        citalia.es/
+                        citalify.es/
                     </span>
                     <input
                         type="text"

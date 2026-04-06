@@ -248,7 +248,7 @@ class PublicBookingController extends Controller
 
         $schedule = null;
         if ($business->schedule_type === 'custom') {
-            $schedule = $employee->customSchedules()->where('date', $date->toDateString())->first();
+            $schedule = $employee->customSchedules()->whereDate('date', $date->toDateString())->first();
             if (!$schedule || $schedule->is_closed) {
                 return response()->json([]);
             }
@@ -301,7 +301,7 @@ class PublicBookingController extends Controller
             'time'           => ['required', 'regex:/^\d{2}:\d{2}$/'],
             'customer_name'  => ['required', 'string', 'max:100'],
             'customer_phone' => ['required', 'string', 'max:20'],
-            'customer_email' => ['nullable', 'email', 'max:100'],
+            'customer_email' => ['required', 'email', 'max:100'],
             'notes'          => ['nullable', 'string', 'max:500'],
         ]);
 

@@ -353,9 +353,9 @@
                     
                     <div class="flex items-center gap-2 w-full md:w-auto" x-data="{ copied: false }">
                         <div class="flex items-center flex-1">
-                            <input type="text" readonly value="citalia.es/{{ auth()->user()->business_slug }}" 
+                            <input type="text" readonly value="citalify.es/{{ auth()->user()->business_slug }}" 
                                    class="text-xs font-mono bg-white border border-slate-200 text-slate-600 px-3 py-2 md:py-2.5 rounded-l-lg w-full md:w-64 focus:outline-none focus:ring-0">
-                            <button @click="navigator.clipboard.writeText('https://citalia.es/{{ auth()->user()->business_slug }}'); copied = true; setTimeout(() => copied = false, 2000)" 
+                            <button @click="navigator.clipboard.writeText('https://citalify.es/{{ auth()->user()->business_slug }}'); copied = true; setTimeout(() => copied = false, 2000)" 
                                     class="bg-white hover:bg-slate-50 border border-l-0 border-slate-200 text-slate-600 px-4 py-2 md:py-2.5 text-xs font-medium rounded-r-lg transition-colors flex items-center gap-1.5 focus:outline-none">
                                 <span x-show="!copied">Copiar</span>
                                 <span x-show="copied" class="text-emerald-600" style="display: none;">¡Copiado!</span>

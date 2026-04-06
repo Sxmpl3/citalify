@@ -110,7 +110,7 @@ class OnboardingController extends Controller
             'schedule_type' => $request->schedule_type
         ]);
 
-        return redirect()->route('dashboard')->with('success', '¡Bienvenido a citalia! Tu negocio ya está configurado.');
+        return redirect()->route('dashboard')->with('success', '¡Bienvenido a citalify! Tu negocio ya está configurado.');
     }
 }
 

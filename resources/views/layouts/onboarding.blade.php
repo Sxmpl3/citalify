@@ -17,12 +17,8 @@
     <header class="bg-white/95 backdrop-blur-sm border-b border-slate-100 shadow-sm">
         <div class="max-w-2xl mx-auto px-4 py-4 flex items-center justify-between">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-2">
-                <span class="w-8 h-8 rounded-xl flex items-center justify-center bg-gradient-to-br from-emerald-600 to-emerald-700">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                </span>
-                <span class="text-lg font-display font-bold text-slate-800">citalia</span>
+                <img src="{{ asset('img/logo.png') }}" alt="Citalify Logo" class="h-9 w-auto rounded-xl">
+                <span class="text-lg font-display font-bold text-slate-800">citalify</span>
             </a>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf

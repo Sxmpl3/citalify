@@ -44,6 +44,10 @@ Route::middleware('auth')->prefix('onboarding')->name('onboarding.')->group(func
 
 require __DIR__.'/auth.php';
 
+Route::get('/confirmar-cita/{booking}', [\App\Http\Controllers\BookingConfirmationController::class, 'confirm'])
+    ->name('booking.confirm')
+    ->middleware('signed');
+
 // Página pública de reservas — al final para no colisionar con rutas anteriores
 Route::get('/{slug}/confirmada',    [PublicBookingController::class, 'confirmed'])->name('booking.confirmed');
 Route::get('/{slug}/calendario',    [PublicBookingController::class, 'calendar'])->name('booking.calendar');
