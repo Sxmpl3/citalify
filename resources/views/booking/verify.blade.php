@@ -28,7 +28,7 @@
                 <div class="mb-6">
                     <label for="code" class="block text-sm font-semibold text-slate-700 mb-2 text-center">Código de 6 dígitos</label>
                     <input type="text" name="code" id="code" maxlength="6" autofocus required
-                        class="w-full text-center text-3xl tracking-[1em] font-bold border-2 border-slate-200 rounded-xl py-4 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 focus:outline-none transition-all uppercase"
+                        class="w-full text-center text-3xl tracking-[0.5em] font-bold border-2 border-slate-200 rounded-xl py-4 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 focus:outline-none transition-all uppercase pl-[0.25em]"
                         placeholder="000000">
                     
                     @error('code')
