@@ -217,7 +217,7 @@
 <body x-data="{ mobileMenuOpen: false }" class="scroll-smooth">
 
 {{-- NAVBAR --}}
-<header class="sticky top-0 z-100 bg-white/95 backdrop-blur-xl border-b border-slate-100 shadow-sm">
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-slate-100 shadow-sm">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16 lg:h-18">
         <a href="{{ route('dashboard') }}" class="flex items-center gap-2 group">
             <x-application-logo class="group-hover:opacity-90 transition-opacity" />
