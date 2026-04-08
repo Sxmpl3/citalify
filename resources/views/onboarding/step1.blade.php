@@ -1,15 +1,15 @@
 <x-onboarding-layout :currentStep="1">
 
-    <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-8">
+    <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-5 sm:p-8">
         <h1 class="text-2xl font-bold text-gray-900 mb-1">Cuéntanos sobre tu negocio</h1>
-        <p class="text-gray-500 mb-6">Esta información aparecerá en tu página de reservas.</p>
+        <p class="text-gray-500 mb-6 font-medium">Esta información aparecerá en tu página de reservas.</p>
 
         <form method="POST" action="{{ route('onboarding.store1') }}">
             @csrf
 
             {{-- Nombre del negocio --}}
             <div class="mb-5">
-                <label for="business_name" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="business_name" class="block text-sm font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
                     Nombre del negocio <span class="text-red-500">*</span>
                 </label>
                 <input
@@ -32,17 +32,27 @@
                     "
                 >
                 @error('business_name')
-                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
+                    <p class="mt-1.5 text-sm text-red-500 font-medium">{{ $message }}</p>
                 @enderror
             </div>
 
             {{-- Slug (URL) --}}
             <div class="mb-5">
-                <label for="business_slug" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="business_slug" class="block text-sm font-semibold text-gray-700 mb-1.5 uppercase tracking-wide">
                     URL de tu página de reservas <span class="text-red-500">*</span>
                 </label>
-                <div class="flex rounded-lg shadow-sm">
-                    <span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-300 bg-slate-50 text-slate-500 text-sm">
+                
+                @error('business_slug')
+                    <div class="mb-2 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 font-semibold flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {{ $message }}
+                    </div>
+                @enderror
+
+                <div class="flex rounded-xl shadow-sm group">
+                    <span class="inline-flex items-center px-3 rounded-l-xl border border-r-0 border-slate-300 bg-slate-50 text-slate-500 text-sm font-medium group-focus-within:border-emerald-500 transition-colors">
                         citalify.es/
                     </span>
                     <input
@@ -54,13 +64,10 @@
                         required
                         x-data
                         x-on:input="$el.dataset.modified = '1'"
-                        class="flex-1 min-w-0 rounded-none rounded-r-lg border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 @error('business_slug') border-red-400 @enderror"
+                        class="flex-1 min-w-0 rounded-none rounded-r-xl border-slate-300 focus:border-emerald-500 focus:ring-emerald-500 @error('business_slug') border-red-400 @enderror text-sm font-medium"
                     >
                 </div>
-                @error('business_slug')
-                    <p class="mt-1 text-sm text-red-500">{{ $message }}</p>
-                @enderror
-                <p class="mt-1 text-xs text-gray-400">Solo letras, números y guiones. Ej: peluqueria-carmen</p>
+                <p class="mt-2 text-xs text-gray-400 font-medium">Solo letras, números y guiones. Ej: peluqueria-carmen</p>
             </div>
 
             {{-- Teléfono --}}

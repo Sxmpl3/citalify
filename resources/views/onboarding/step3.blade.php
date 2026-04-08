@@ -1,6 +1,6 @@
 <x-onboarding-layout :currentStep="3">
 
-    <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-8"
+    <div class="bg-white rounded-2xl shadow-lg border border-slate-100 p-5 sm:p-8"
          x-data="{
              scheduleType: 'normal',
              days: [
@@ -118,11 +118,11 @@
             <!-- Horario Normal -->
             <div x-show="scheduleType === 'normal'" class="space-y-2 mb-8" x-transition>
                 <template x-for="d in days" :key="d.day">
-                    <div class="flex items-center gap-4 p-3 rounded-lg border"
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-2xl border transition-all"
                          :class="d.active ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-slate-50'">
 
                         {{-- Toggle día --}}
-                        <label class="flex items-center cursor-pointer w-28 gap-2 select-none">
+                        <label class="flex items-center cursor-pointer w-full sm:w-28 gap-3 select-none">
                             <div class="relative">
                                 <input type="checkbox" x-model="d.active" class="sr-only">
                                 <div class="w-10 h-5 rounded-full transition-colors"
@@ -130,28 +130,28 @@
                                 <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
                                      :class="d.active ? 'translate-x-5' : 'translate-x-0'"></div>
                             </div>
-                            <span class="text-sm font-medium capitalize" :class="d.active ? 'text-gray-800' : 'text-gray-400'"
+                            <span class="text-sm font-bold capitalize" :class="d.active ? 'text-gray-800' : 'text-gray-400'"
                                   x-text="d.label"></span>
                         </label>
 
                         {{-- Horario --}}
                         <template x-if="d.active">
-                            <div class="flex items-center gap-2 flex-1">
+                            <div class="flex items-center gap-3 w-full sm:flex-1">
                                 <input
                                     type="time"
                                     x-model="d.open"
-                                    class="rounded-xl border-slate-300 text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                                    class="flex-1 sm:flex-none rounded-xl border-slate-300 text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-white"
                                 >
-                                <span class="text-gray-400 text-sm">a</span>
+                                <span class="text-gray-400 text-sm font-medium">a</span>
                                 <input
                                     type="time"
                                     x-model="d.close"
-                                    class="rounded-xl border-slate-300 text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                                    class="flex-1 sm:flex-none rounded-xl border-slate-300 text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-white"
                                 >
                             </div>
                         </template>
                         <template x-if="!d.active">
-                            <span class="text-sm text-gray-400 italic">Cerrado</span>
+                            <span class="text-sm text-gray-400 font-medium italic">Cerrado</span>
                         </template>
                     </div>
                 </template>
@@ -159,13 +159,13 @@
             </div>
 
             <!-- Horario Especial -->
-            <div x-show="scheduleType === 'custom'" class="space-y-2 mb-8" x-transition style="display: none;">
+            <div x-show="scheduleType === 'custom'" class="space-y-3 mb-8" x-transition style="display: none;">
                 <template x-for="d in customDays" :key="d.date">
-                    <div class="flex items-center gap-4 p-3 rounded-lg border"
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-2xl border transition-all"
                          :class="d.active ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-slate-50'">
 
                         {{-- Toggle día --}}
-                        <label class="flex items-center cursor-pointer w-32 gap-2 select-none">
+                        <label class="flex items-center cursor-pointer w-full sm:w-32 gap-3 select-none">
                             <div class="relative">
                                 <input type="checkbox" x-model="d.active" class="sr-only">
                                 <div class="w-10 h-5 rounded-full transition-colors"
@@ -173,28 +173,28 @@
                                 <div class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform"
                                      :class="d.active ? 'translate-x-5' : 'translate-x-0'"></div>
                             </div>
-                            <span class="text-sm font-medium capitalize" :class="d.active ? 'text-gray-800' : 'text-gray-400'"
+                            <span class="text-sm font-bold capitalize" :class="d.active ? 'text-gray-800' : 'text-gray-400'"
                                   x-text="d.label"></span>
                         </label>
 
                         {{-- Horario --}}
                         <template x-if="d.active">
-                            <div class="flex items-center gap-2 flex-1">
+                            <div class="flex items-center gap-3 w-full sm:flex-1">
                                 <input
                                     type="time"
                                     x-model="d.open"
-                                    class="rounded-xl border-slate-300 text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                                    class="flex-1 sm:flex-none rounded-xl border-slate-300 text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-white"
                                 >
-                                <span class="text-gray-400 text-sm">a</span>
+                                <span class="text-gray-400 text-sm font-medium">a</span>
                                 <input
                                     type="time"
                                     x-model="d.close"
-                                    class="rounded-xl border-slate-300 text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                                    class="flex-1 sm:flex-none rounded-xl border-slate-300 text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-white"
                                 >
                             </div>
                         </template>
                         <template x-if="!d.active">
-                            <span class="text-sm text-gray-400 italic">Cerrado</span>
+                            <span class="text-sm text-gray-400 font-medium italic">Cerrado</span>
                         </template>
                     </div>
                 </template>
