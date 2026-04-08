@@ -11,6 +11,7 @@
         <link href="https://fonts.bunny.net/css?family=dm-sans:400,500,600,700,800|outfit:600,700,800&display=swap" rel="stylesheet" />
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <x-favicons />
     </head>
     <body class="font-sans text-slate-800 antialiased">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 px-4 bg-gradient-to-br from-slate-50 via-emerald-50/30 to-slate-50">

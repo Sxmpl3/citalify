@@ -68,6 +68,7 @@
     </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <x-favicons />
 </head>
 <body class="font-sans antialiased bg-slate-50 min-h-screen">
 
