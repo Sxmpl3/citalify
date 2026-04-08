@@ -90,14 +90,24 @@ class DashboardController extends Controller
             'price'          => $service->price,
             'customer_name'  => $data['customer_name'],
             'customer_phone' => $data['customer_phone'] ?? '',
-            'customer_email' => $data['customer_email'],
+            'customer_email' => $data['customer_email'] ?? null,
             'starts_at'      => $startsAt->utc(),
             'ends_at'        => $endsAt->utc(),
             'status'         => 'confirmed',
-            'notes'          => $data['notes'],
+            'notes'          => $data['notes'] ?? null,
         ]);
 
         return back()->with('success', 'Cita agregada manualmente.');
+    }
+
+    public function confirm(\App\Models\Booking $booking): \Illuminate\Http\RedirectResponse
+    {
+        $user = auth()->user();
+        abort_if($booking->user_id !== $user->id, 403);
+        
+        $booking->update(['status' => 'confirmed']);
+        
+        return back()->with('success', 'Asistencia confirmada para ' . $booking->customer_name);
     }
 
     public function cancel(Booking $booking, Request $request): \Illuminate\Http\RedirectResponse
@@ -158,6 +168,7 @@ class DashboardController extends Controller
             }
 
             if ($wasOpen && $isNowClosed) {
+                $tz = $user->timezone ?? 'Europe/Madrid';
                 $startRange = \Carbon\Carbon::parse($formattedDate, $tz)->startOfDay()->utc();
                 $endRange   = \Carbon\Carbon::parse($formattedDate, $tz)->endOfDay()->utc();
 
@@ -185,6 +196,38 @@ class DashboardController extends Controller
             }
         }
 
-        return back()->with('success', 'Horario actualizado para el día ' . \Carbon\Carbon::parse($data['date'])->format('d/m/Y'));
+    }
+
+    public function updateWeeklySchedule(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $user = auth()->user();
+        abort_if($user->schedule_type !== 'normal', 400, 'Solo disponible en Horario Normal');
+
+        $request->validate([
+            'schedules'            => ['required', 'array'],
+            'schedules.*.day'      => ['required', 'integer', 'between:0,6'],
+            'schedules.*.open'     => ['required', 'date_format:H:i'],
+            'schedules.*.close'    => ['required', 'date_format:H:i', 'after:schedules.*.open'],
+            'schedules.*.break_start' => ['nullable', 'date_format:H:i'],
+            'schedules.*.break_end'   => ['nullable', 'date_format:H:i', 'after:schedules.*.break_start'],
+        ]);
+
+        $employee = $user->employees()->first();
+        if ($employee) {
+            // Eliminar horarios anteriores y crear los nuevos
+            $employee->schedules()->delete();
+
+            foreach ($request->schedules as $sch) {
+                $employee->schedules()->create([
+                    'day_of_week'  => $sch['day'],
+                    'open_time'    => $sch['open'],
+                    'close_time'   => $sch['close'],
+                    'break_start'  => !empty($sch['break_start']) ? $sch['break_start'] : null,
+                    'break_end'    => !empty($sch['break_end']) ? $sch['break_end'] : null,
+                ]);
+            }
+        }
+
+        return back()->with('success', 'Horario semanal actualizado correctamente.');
     }
 }

@@ -210,11 +210,19 @@ class PublicBookingController extends Controller
 
             $open   = Carbon::parse($date->toDateString() . ' ' . $schedule->open_time, $tz);
             $close  = Carbon::parse($date->toDateString() . ' ' . $schedule->close_time, $tz);
+            $breakStart = $schedule->break_start ? Carbon::parse($date->toDateString() . ' ' . $schedule->break_start, $tz) : null;
+            $breakEnd   = $schedule->break_end   ? Carbon::parse($date->toDateString() . ' ' . $schedule->break_end,   $tz) : null;
             $cursor = $open->copy();
             $hasSlot = false;
 
             while ($cursor->copy()->addMinutes($duration)->lte($close)) {
                 $slotEnd = $cursor->copy()->addMinutes($duration);
+
+                // Skip slots that overlap with the break
+                if ($breakStart && $breakEnd && $cursor->lt($breakEnd) && $slotEnd->gt($breakStart)) {
+                    $cursor->addMinutes($duration);
+                    continue;
+                }
 
                 if ($cursor->gte($now)) {
                     $conflict = $bookings->first(
@@ -277,6 +285,8 @@ class PublicBookingController extends Controller
 
         $open     = Carbon::parse($date->toDateString() . ' ' . $schedule->open_time, $tz);
         $close    = Carbon::parse($date->toDateString() . ' ' . $schedule->close_time, $tz);
+        $breakStart = $schedule->break_start ? Carbon::parse($date->toDateString() . ' ' . $schedule->break_start, $tz) : null;
+        $breakEnd   = $schedule->break_end   ? Carbon::parse($date->toDateString() . ' ' . $schedule->break_end,   $tz) : null;
         $duration = $service->duration_minutes;
 
         $now    = Carbon::now($tz);
@@ -285,6 +295,12 @@ class PublicBookingController extends Controller
 
         while ($cursor->copy()->addMinutes($duration)->lte($close)) {
             $slotEnd = $cursor->copy()->addMinutes($duration);
+
+            // Skip slots that overlap with the break window
+            if ($breakStart && $breakEnd && $cursor->lt($breakEnd) && $slotEnd->gt($breakStart)) {
+                $cursor->addMinutes($duration);
+                continue;
+            }
 
             // Solo slots que empiezan ahora o en el futuro
             if ($cursor->gte($now)) {

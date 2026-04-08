@@ -70,6 +70,8 @@ class OnboardingController extends Controller
             'schedules.*.day'      => ['required_with:schedules', 'integer', 'between:0,6'],
             'schedules.*.open'     => ['required_with:schedules', 'date_format:H:i'],
             'schedules.*.close'    => ['required_with:schedules', 'date_format:H:i', 'after:schedules.*.open'],
+            'schedules.*.break_start' => ['nullable', 'date_format:H:i'],
+            'schedules.*.break_end'   => ['nullable', 'date_format:H:i', 'after:schedules.*.break_start'],
             
             'custom_schedules'            => ['required_if:schedule_type,custom', 'array'],
             'custom_schedules.*.date'     => ['required_with:custom_schedules', 'date'],
@@ -80,27 +82,35 @@ class OnboardingController extends Controller
 
         $user = auth()->user();
 
-        // Crear empleado por defecto (el propio propietario)
-        $employee = Employee::create([
-            'user_id' => $user->id,
-            'name'    => $user->business_name ?? $user->name,
-        ]);
+        // Obtener o crear empleado por defecto (el propio propietario)
+        $employee = Employee::firstOrCreate(
+            ['user_id' => $user->id],
+            ['name'    => $user->business_name ?? $user->name]
+        );
+
+        // Limpiar horarios previos si existen para evitar duplicados al repetir el paso
+        $employee->schedules()->delete();
+        $employee->customSchedules()->delete();
 
         if ($request->schedule_type === 'normal' && $request->has('schedules')) {
             foreach ($request->schedules as $sch) {
                 $employee->schedules()->create([
-                    'day_of_week' => $sch['day'],
-                    'open_time'   => $sch['open'],
-                    'close_time'  => $sch['close'],
+                    'day_of_week'  => $sch['day'],
+                    'open_time'    => $sch['open'],
+                    'close_time'   => $sch['close'],
+                    'break_start'  => ($sch['break_start'] ?? null) ?: null,
+                    'break_end'    => ($sch['break_end'] ?? null) ?: null,
                 ]);
             }
         } elseif ($request->schedule_type === 'custom' && $request->has('custom_schedules')) {
             foreach ($request->custom_schedules as $sch) {
                 $employee->customSchedules()->create([
-                    'date'       => $sch['date'],
-                    'is_closed'  => $sch['is_closed'],
-                    'open_time'  => $sch['is_closed'] ? null : ($sch['open'] ?? null),
-                    'close_time' => $sch['is_closed'] ? null : ($sch['close'] ?? null),
+                    'date'         => $sch['date'],
+                    'is_closed'    => $sch['is_closed'],
+                    'open_time'    => $sch['is_closed'] ? null : ($sch['open'] ?? null),
+                    'close_time'   => $sch['is_closed'] ? null : ($sch['close'] ?? null),
+                    'break_start'  => (!$sch['is_closed'] && ($sch['break_start'] ?? null)) ? $sch['break_start'] : null,
+                    'break_end'    => (!$sch['is_closed'] && ($sch['break_end'] ?? null)) ? $sch['break_end'] : null,
                 ]);
             }
         }

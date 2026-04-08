@@ -31,6 +31,36 @@
                 </div>
             @endif
 
+            {{-- Enlace de reservas --}}
+            @if(auth()->user()->business_slug)
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                        </div>
+                        <div>
+                            <p class="font-medium text-slate-800 text-sm">Tu enlace de reservas</p>
+                            <p class="text-slate-500 text-xs mt-0.5">Comparte este enlace para que tus clientes reserven online.</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 w-full md:w-auto" x-data="{ copied: false }">
+                        <div class="flex items-center flex-1 md:flex-initial">
+                            <input type="text" readonly value="citalify.es/{{ auth()->user()->business_slug }}" 
+                                   class="text-xs font-mono bg-white border border-slate-200 text-slate-600 px-3 py-2 md:py-2.5 rounded-l-lg w-full md:w-64 focus:outline-none focus:ring-0">
+                            <button @click="navigator.clipboard.writeText('https://citalify.es/{{ auth()->user()->business_slug }}'); copied = true; setTimeout(() => copied = false, 2000)" 
+                                    class="bg-white hover:bg-slate-50 border border-l-0 border-slate-200 text-slate-600 px-4 py-2 md:py-2.5 text-xs font-medium rounded-r-lg transition-colors flex items-center gap-1.5 focus:outline-none whitespace-nowrap">
+                                <span x-show="!copied">Copiar</span>
+                                <span x-show="copied" class="text-emerald-600" style="display: none;">¡Copiado!</span>
+                            </button>
+                        </div>
+                        <a href="{{ route('booking.show', auth()->user()->business_slug) }}" target="_blank" 
+                           class="p-2 md:p-2.5 text-slate-400 hover:text-emerald-600 bg-white border border-slate-200 rounded-lg hover:border-emerald-200 transition-colors shrink-0" title="Abrir web">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        </a>
+                    </div>
+                </div>
+            @endif
+
             {{-- Stats --}}
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {{-- Hoy --}}
@@ -109,12 +139,21 @@
                                         <p class="text-xs text-slate-400 mt-1 truncate">"{{ $booking->notes }}"</p>
                                     @endif
                                 </div>
-                                <div class="shrink-0 flex items-center">
+                                <div class="shrink-0 flex items-center gap-3">
+                                    @if($booking->status === 'pending')
+                                        <form action="{{ route('dashboard.bookings.confirm', $booking) }}" method="POST">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="text-xs text-emerald-600 hover:text-emerald-700 underline underline-offset-2 font-bold bg-emerald-50 px-2.5 py-1 rounded-lg transition-colors">
+                                                Confirmar
+                                            </button>
+                                        </form>
+                                    @endif
                                     <button @click="bookingToCancel = {
                                         id: {{ $booking->id }},
                                         customer_name: '{{ addslashes($booking->customer_name) }}',
                                         customer_email: '{{ addslashes($booking->customer_email ?? '') }}'
-                                    }" class="text-xs text-red-500 hover:text-red-700 underline underline-offset-2 opacity-0 group-hover:opacity-100 transition-opacity font-medium bg-red-50 px-2 py-1 rounded">
+                                    }" class="text-xs text-red-500 hover:text-red-700 underline underline-offset-2 transition-opacity font-medium bg-red-50 px-2 py-1 rounded">
                                         Cancelar
                                     </button>
                                 </div>
@@ -202,12 +241,12 @@
                     <div x-show="!loadingDay && bookings.length > 0" class="divide-y divide-slate-50">
                         <template x-for="b in bookings" :key="b.id">
                             <div class="px-4 sm:px-5 py-4 hover:bg-slate-50/60 transition-colors flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                                <div class="flex items-start gap-4 flex-1 min-w-0">
-                                    <div class="text-center w-14 shrink-0 pt-0.5">
+                                <div class="flex items-center gap-4 flex-1 min-w-0">
+                                    <div class="text-center w-14 shrink-0">
                                         <p class="text-base font-bold text-slate-700 tabular-nums leading-none" x-text="b.starts_at"></p>
                                         <p class="text-xs text-slate-400 tabular-nums" x-text="b.ends_at"></p>
                                     </div>
-                                    <div class="w-1 h-10 rounded-full bg-emerald-400 shrink-0 mt-0.5"></div>
+                                    <div class="w-1 h-10 rounded-full bg-emerald-400 shrink-0"></div>
                                     <div class="flex-1 min-w-0">
                                         <p class="font-semibold text-slate-800 truncate" x-text="b.customer_name"></p>
                                         <p class="text-sm text-slate-500 truncate" x-text="b.service"></p>
@@ -222,6 +261,14 @@
                                 <div class="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-2 pl-[4.5rem] sm:pl-0">
                                     <span x-show="b.status === 'confirmed'" class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700">Confirmada</span>
                                     <span x-show="b.status === 'pending'" class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold bg-amber-50 text-amber-700">Pendiente</span>
+                                    
+                                    <form x-show="b.status === 'pending'" :action="'{{ url('dashboard/citas') }}/' + b.id + '/confirm'" method="POST">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="text-xs text-emerald-600 hover:text-emerald-700 underline underline-offset-2 font-bold bg-emerald-50 px-2 py-1 rounded-lg">
+                                            Confirmar
+                                        </button>
+                                    </form>
                                     
                                     <button @click="bookingToCancel = b" class="text-xs text-red-500 hover:text-red-700 underline underline-offset-2 font-medium">
                                         Cancelar cita
@@ -275,40 +322,128 @@
 
             <!-- Modal Añadir -->
             <div x-show="openAddModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4" x-transition.opacity>
-                <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden" @click.outside="openAddModal = false" x-transition>
-                    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-                        <h3 class="font-bold text-lg text-slate-800">Añadir Cita Manual</h3>
-                        <button @click="openAddModal = false" class="text-slate-400 hover:text-slate-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-100" @click.outside="openAddModal = false" x-transition>
+                    <div class="px-6 py-5 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+                        <h3 class="font-display font-bold text-lg text-slate-800">Añadir Cita Manual</h3>
+                        <button @click="openAddModal = false" class="text-slate-400 hover:text-slate-600 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                     </div>
-                    <form action="{{ route('dashboard.bookings.store') }}" method="POST" class="p-6 space-y-4">
+                    <form action="{{ route('dashboard.bookings.store') }}" method="POST" class="p-6 space-y-5">
                         @csrf
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Nombre o Título <span class="text-red-500">*</span></label>
-                            <input type="text" name="customer_name" required class="w-full rounded-xl border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Nombre o Título <span class="text-red-500">*</span></label>
+                            <input type="text" name="customer_name" required placeholder="Ej: Cliente Regular"
+                                   class="w-full rounded-2xl border-slate-200 shadow-sm focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all">
                         </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Fecha <span class="text-red-500">*</span></label>
-                                <input type="date" name="date" required :value="selectedDate || ''" class="w-full rounded-xl border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-medium text-slate-700 mb-1">Hora inicio <span class="text-red-500">*</span></label>
-                                <input type="time" name="time" required class="w-full rounded-xl border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
-                            </div>
-                        </div>
+
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1">Servicio Asignado <span class="text-red-500">*</span></label>
-                            <select name="service_id" required class="w-full rounded-xl border-slate-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500">
+                            <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Servicio <span class="text-red-500">*</span></label>
+                            <select name="service_id" required x-model="addModalServiceId"
+                                    class="w-full rounded-2xl border-slate-200 shadow-sm focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all">
+                                <option value="">Selecciona un servicio</option>
                                 @foreach($services as $svc)
                                     <option value="{{ $svc->id }}">{{ $svc->name }} ({{ $svc->duration_minutes }} min)</option>
                                 @endforeach
                             </select>
                         </div>
-                        <div class="pt-2 flex justify-end gap-3 mt-6">
-                            <button type="button" @click="openAddModal = false" class="px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 rounded-xl transition-colors">Cancelar</button>
-                            <button type="submit" class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white px-5 py-2.5 text-sm font-medium rounded-xl shadow-md transition-all">Crear Cita</button>
+
+                        <div class="grid grid-cols-1 gap-4">
+                            <input type="hidden" name="date" x-model="addModalDate">
+                            <input type="hidden" name="time" x-model="addModalTime">
+                            
+                            {{-- Calendario de 14 días --}}
+                            <div x-show="addModalServiceId">
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 pl-1">Selecciona un día <span class="text-red-500">*</span></label>
+                                
+                                <div x-show="loadingCalendarAdd" class="flex justify-center py-8">
+                                    <svg class="animate-spin w-8 h-8 text-emerald-500" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                    </svg>
+                                </div>
+
+                                <div x-show="!loadingCalendarAdd && addModalDays.length > 0" class="grid grid-cols-7 gap-1.5">
+                                    <template x-for="day in addModalDays" :key="day.date">
+                                        <button type="button" 
+                                                @click="addModalDate = day.date; addModalTime = ''"
+                                                :disabled="day.status !== 'available'"
+                                                class="aspect-square rounded-xl flex flex-col items-center justify-center transition-all select-none text-[10px]"
+                                                :class="{
+                                                    'bg-emerald-500 text-white cursor-pointer hover:bg-emerald-400': day.status === 'available' && addModalDate !== day.date,
+                                                    'bg-emerald-600 text-white ring-2 ring-emerald-300 ring-offset-1 scale-105 shadow-md': day.status === 'available' && addModalDate === day.date,
+                                                    'bg-slate-800 text-slate-500 cursor-default': day.status === 'closed',
+                                                    'bg-red-400 text-white shrink-0 cursor-default opacity-50': day.status === 'full',
+                                                }">
+                                            <span class="font-medium opacity-80" x-text="dayName(day.date)"></span>
+                                            <span class="text-xs font-bold" x-text="dayNum(day.date)"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+
+                            {{-- Slots de hora --}}
+                            <div x-show="addModalDate" class="pt-2">
+                                <label class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 pl-1">Huecos para el <span x-text="formatDate(addModalDate)" class="text-emerald-600"></span></label>
+                                
+                                <div x-show="loadingSlots" class="flex justify-center py-4">
+                                    <svg class="animate-spin w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                    </svg>
+                                </div>
+
+                                <div x-show="!loadingSlots && addModalSlots.length === 0" class="text-center py-6 bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                                    <p class="text-[11px] text-slate-400">No hay disponibilidad automática para esta fecha</p>
+                                    <p class="text-[10px] text-slate-300 mt-1">Usa el modo "Forzar" (próximamente) o cambia de día</p>
+                                </div>
+
+                                <div x-show="!loadingSlots && addModalSlots.length > 0" class="grid grid-cols-4 gap-2 max-h-40 overflow-y-auto p-1 custom-scrollbar">
+                                    <template x-for="slot in addModalSlots" :key="slot">
+                                        <button type="button" @click="addModalTime = slot"
+                                                class="py-2.5 rounded-xl border-2 text-[11px] font-bold transition-all tabular-nums"
+                                                :class="addModalTime === slot 
+                                                    ? 'bg-emerald-600 border-emerald-600 text-white shadow-md' 
+                                                    : 'border-slate-100 text-slate-600 hover:border-emerald-200 hover:bg-emerald-50/50'">
+                                            <span x-text="slot"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+
+                            {{-- Datos adicionales opcionales --}}
+                            <div x-show="addModalTime" x-transition class="pt-4 border-t border-slate-50 space-y-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Teléfono</label>
+                                        <input type="tel" name="customer_phone" placeholder="Ej: 600 000 000"
+                                               class="w-full rounded-2xl border-slate-200 text-sm shadow-sm focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Email</label>
+                                        <input type="email" name="customer_email" placeholder="cliente@email.com"
+                                               class="w-full rounded-2xl border-slate-200 text-sm shadow-sm focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5 pl-1">Notas</label>
+                                    <textarea name="notes" rows="2" placeholder="Notas adicionales..."
+                                              class="w-full rounded-2xl border-slate-200 text-sm shadow-sm focus:border-emerald-500 focus:ring-4 focus:ring-emerald-50 transition-all"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pt-4 flex items-center gap-3">
+                            <button type="button" @click="openAddModal = false" 
+                                    class="flex-1 px-5 py-3.5 text-sm font-bold text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-2xl transition-all">
+                                Cancelar
+                            </button>
+                            <button type="submit" 
+                                    :disabled="!addModalTime"
+                                    class="flex-1 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-5 py-3.5 text-sm font-bold rounded-2xl shadow-lg shadow-emerald-900/10 transition-all hover:scale-[1.02] active:scale-[0.98]">
+                                Crear Cita
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -344,37 +479,6 @@
                 </div>
             </div>
 
-            {{-- Tarjeta página pública rediseñada --}}
-            @if(auth()->user()->business_slug)
-                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 mt-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
-                        </div>
-                        <div>
-                            <p class="font-medium text-slate-800 text-sm">Tu enlace de reservas</p>
-                            <p class="text-slate-500 text-xs mt-0.5">Comparte este enlace para que tus clientes reserven online.</p>
-                        </div>
-                    </div>
-                    
-                    <div class="flex items-center gap-2 w-full md:w-auto" x-data="{ copied: false }">
-                        <div class="flex items-center flex-1">
-                            <input type="text" readonly value="citalify.es/{{ auth()->user()->business_slug }}" 
-                                   class="text-xs font-mono bg-white border border-slate-200 text-slate-600 px-3 py-2 md:py-2.5 rounded-l-lg w-full md:w-64 focus:outline-none focus:ring-0">
-                            <button @click="navigator.clipboard.writeText('https://citalify.es/{{ auth()->user()->business_slug }}'); copied = true; setTimeout(() => copied = false, 2000)" 
-                                    class="bg-white hover:bg-slate-50 border border-l-0 border-slate-200 text-slate-600 px-4 py-2 md:py-2.5 text-xs font-medium rounded-r-lg transition-colors flex items-center gap-1.5 focus:outline-none">
-                                <span x-show="!copied">Copiar</span>
-                                <span x-show="copied" class="text-emerald-600" style="display: none;">¡Copiado!</span>
-                            </button>
-                        </div>
-                        <a href="{{ route('booking.show', auth()->user()->business_slug) }}" target="_blank" 
-                           class="p-2 md:p-2.5 text-slate-400 hover:text-emerald-600 bg-white border border-slate-200 rounded-lg hover:border-emerald-200 transition-colors" title="Abrir web">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
-                        </a>
-                    </div>
-                </div>
-            @endif
-
         </div>
     </div>
 
@@ -397,8 +501,52 @@
                 modalCloseTime: '19:00',
                 bookingToCancel: null,
 
+                // Nueva Cita Manual
+                addModalServiceId: '',
+                addModalDate: '',
+                addModalTime: '',
+                addModalSlots: [],
+                addModalDays: [],
+                loadingSlots: false,
+                loadingCalendarAdd: false,
+
                 async init() {
                     await this.loadCalendar();
+                    this.$watch('addModalDate', () => this.loadAddModalSlots());
+                    this.$watch('addModalServiceId', () => this.loadAddModalCalendar());
+                },
+
+                async loadAddModalCalendar() {
+                    if (!this.addModalServiceId) {
+                        this.addModalDays = [];
+                        return;
+                    }
+                    this.loadingCalendarAdd = true;
+                    this.addModalDate = '';
+                    this.addModalTime = '';
+                    this.addModalSlots = [];
+                    try {
+                        const res = await fetch('/' + this.slug + '/calendario?service_id=' + this.addModalServiceId);
+                        this.addModalDays = await res.json();
+                    } catch (_) {
+                        this.addModalDays = [];
+                    }
+                    this.loadingCalendarAdd = false;
+                },
+
+                async loadAddModalSlots() {
+                    if (!this.addModalServiceId || !this.addModalDate) {
+                        this.addModalSlots = [];
+                        return;
+                    }
+                    this.loadingSlots = true;
+                    try {
+                        const res = await fetch('/' + this.slug + '/disponibilidad?service_id=' + this.addModalServiceId + '&date=' + this.addModalDate);
+                        this.addModalSlots = await res.json();
+                    } catch (_) {
+                        this.addModalSlots = [];
+                    }
+                    this.loadingSlots = false;
                 },
                 async loadCalendar() {
                     this.loading = true;

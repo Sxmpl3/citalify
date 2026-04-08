@@ -13,6 +13,8 @@ class CustomSchedule extends Model
         'open_time',
         'close_time',
         'is_closed',
+        'break_start',
+        'break_end',
     ];
 
     protected $casts = [

@@ -406,7 +406,9 @@
     </div>
 
     <p class="text-center text-xs text-slate-300 mt-8">
-        Reservas gestionadas por <a href="/" class="text-emerald-500 font-medium hover:text-emerald-700">citalify</a>
+        <a href="{{ route('customer.login') }}" class="text-slate-400 font-medium hover:text-emerald-500 transition-colors">Gestionar mis reservas</a>
+        <span class="mx-2">&bull;</span>
+        Reservas por <a href="/" class="text-emerald-500 font-medium hover:text-emerald-700">citalify</a>
     </p>
 
 </main>

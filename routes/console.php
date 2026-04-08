@@ -10,6 +10,7 @@ Artisan::command('inspire', function () {
 use Illuminate\Support\Facades\Schedule;
 Schedule::command('bookings:send-reminders')->dailyAt('15:00')->timezone('Europe/Madrid');
 Schedule::command('bookings:send-daily-agenda')->dailyAt('21:00')->timezone('Europe/Madrid');
+Schedule::command('bookings:auto-confirm-end-day')->dailyAt('23:00')->timezone('Europe/Madrid');
 Schedule::call(function () {
     \App\Models\PendingBooking::where('expires_at', '<', now())->delete();
 })->hourly();

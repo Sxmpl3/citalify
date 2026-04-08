@@ -24,8 +24,8 @@
                     <h3 style="margin-top: 0; margin-bottom: 15px; color: #0f172a; font-size: 16px;">Detalles de la cita anulada:</h3>
                     <ul style="list-style-type: none; padding: 0; margin: 0; line-height: 1.8;">
                         <li><strong style="color: #475569;">Servicio:</strong> {{ $booking->service->name ?? 'Servicio' }}</li>
-                        <li><strong style="color: #475569;">Fecha:</strong> {{ \Carbon\Carbon::parse($booking->starts_at)->format('d/m/Y') }}</li>
-                        <li><strong style="color: #475569;">Hora:</strong> {{ \Carbon\Carbon::parse($booking->starts_at)->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->ends_at)->format('H:i') }}</li>
+                        <li><strong style="color: #475569;">Fecha:</strong> {{ \Carbon\Carbon::parse($booking->starts_at)->setTimezone($booking->user->timezone ?? 'Europe/Madrid')->translatedFormat('l, d \d\e F') }}</li>
+                        <li><strong style="color: #475569;">Hora:</strong> {{ \Carbon\Carbon::parse($booking->starts_at)->setTimezone($booking->user->timezone ?? 'Europe/Madrid')->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->ends_at)->setTimezone($booking->user->timezone ?? 'Europe/Madrid')->format('H:i') }}</li>
                     </ul>
                 </div>
                 

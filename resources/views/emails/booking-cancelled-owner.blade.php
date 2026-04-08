@@ -25,8 +25,8 @@
             <div class="details-box">
                 <p><strong>Cliente:</strong> {{ $booking->customer_name }}</p>
                 <p><strong>Servicio:</strong> {{ $booking->service->name }}</p>
-                <p><strong>Fecha:</strong> {{ \Carbon\Carbon::parse($booking->starts_at)->timezone($booking->user->timezone ?? 'Europe/Madrid')->translatedFormat('d \d\e F') }}</p>
-                <p><strong>Hora:</strong> {{ \Carbon\Carbon::parse($booking->starts_at)->timezone($booking->user->timezone ?? 'Europe/Madrid')->format('H:i') }}</p>
+                <p><strong>Fecha:</strong> {{ \Carbon\Carbon::parse($booking->starts_at)->timezone($booking->user->timezone ?? 'Europe/Madrid')->translatedFormat('l, d \d\e F') }}</p>
+                <p><strong>Hora:</strong> {{ \Carbon\Carbon::parse($booking->starts_at)->timezone($booking->user->timezone ?? 'Europe/Madrid')->format('H:i') }} - {{ \Carbon\Carbon::parse($booking->ends_at)->timezone($booking->user->timezone ?? 'Europe/Madrid')->format('H:i') }}</p>
             </div>
             
             <p>El hueco ya está disponible de nuevo en tu calendario para otros clientes.</p>

@@ -13,6 +13,8 @@
         .info-item { margin-bottom: 12px; font-size: 15px; }
         .info-label { font-weight: 700; color: #64748b; width: 80px; display: inline-block; }
         .reminder-box { background-color: #f0fdf4; border-left: 4px solid #10b981; padding: 16px; border-radius: 0 8px 8px 0; margin-top: 24px; font-size: 14px; }
+        .button-container { text-align: center; margin-top: 32px; }
+        .button { display: inline-block; background-color: #059669; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 16px; transition: background-color 0.2s; }
         .footer { background-color: #f1f5f9; padding: 24px; text-align: center; font-size: 13px; color: #64748b; }
     </style>
 </head>
@@ -28,6 +30,10 @@
                 <div class="info-item"><span class="info-label">Hora:</span> {{ \Carbon\Carbon::parse($booking->starts_at)->timezone($booking->user->timezone ?? 'Europe/Madrid')->format('H:i') }}</div>
                 <div class="info-item"><span class="info-label">Servicio:</span> {{ $booking->service->name }}</div>
                 <div class="info-item"><span class="info-label">Lugar:</span> {{ $booking->user->address ?: 'Consultar con el negocio' }}</div>
+            </div>
+
+            <div class="button-container">
+                <a href="{{ route('customer.login') }}" class="button">Gestionar mis reservas</a>
             </div>
 
             <div class="reminder-box">
