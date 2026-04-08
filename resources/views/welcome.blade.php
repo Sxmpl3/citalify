@@ -319,7 +319,7 @@
                 ¿Cuánto te cuesta gestionar<br>citas por WhatsApp?
             </h2>
             <p class="text-lg max-w-xl mx-auto text-slate-600">
-                Cada no-show es dinero perdido. Cada confirmación manual es tiempo robado.
+                Cada ausencia es dinero perdido. Cada confirmación manual es tiempo robado.
             </p>
         </div>
         <div class="grid sm:grid-cols-3 gap-6">
