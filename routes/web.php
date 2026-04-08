@@ -11,7 +11,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::middleware(['auth', 'onboarding'])->group(function () {
+Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/dashboard/horario', [DashboardController::class, 'updateSchedule'])->name('dashboard.schedule.update');
     Route::post('/dashboard/citas', [DashboardController::class, 'storeManual'])->name('dashboard.bookings.store');
@@ -30,12 +30,12 @@ Route::middleware(['auth', 'onboarding'])->group(function () {
 });
 
 // Endpoints de agenda para propietario (auth requerido)
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/{slug}/agenda-propietario', [PublicBookingController::class, 'ownerCalendar'])->name('booking.owner-calendar');
     Route::get('/{slug}/dia',                [PublicBookingController::class, 'dayBookings'])->name('booking.day-bookings');
 });
 
-Route::middleware('auth')->prefix('onboarding')->name('onboarding.')->group(function () {
+Route::middleware(['auth', 'verified'])->prefix('onboarding')->name('onboarding.')->group(function () {
     Route::get('/{step}', [OnboardingController::class, 'show'])->name('step');
     Route::post('/1', [OnboardingController::class, 'storeStep1'])->name('store1');
     Route::post('/2', [OnboardingController::class, 'storeStep2'])->name('store2');
@@ -54,6 +54,8 @@ Route::get('/cancelar-cita/{booking}', [\App\Http\Controllers\BookingConfirmatio
 
 // Página pública de reservas — al final para no colisionar con rutas anteriores
 Route::get('/{slug}/confirmada',    [PublicBookingController::class, 'confirmed'])->name('booking.confirmed');
+Route::get('/{slug}/verificar/{pending_booking}', [PublicBookingController::class, 'showVerify'])->name('booking.verify');
+Route::post('/{slug}/verificar/{pending_booking}', [PublicBookingController::class, 'verifyCode'])->name('booking.verify.post');
 Route::get('/{slug}/calendario',    [PublicBookingController::class, 'calendar'])->name('booking.calendar');
 Route::get('/{slug}/disponibilidad',[PublicBookingController::class, 'availability'])->name('booking.availability');
 Route::post('/{slug}/reservar',     [PublicBookingController::class, 'store'])->name('booking.store');

@@ -6,10 +6,14 @@ use App\Models\Booking;
 use App\Models\Employee;
 use App\Models\Service;
 use App\Models\User;
+use App\Models\PendingBooking;
+use App\Mail\BookingOtpMail;
+use App\Mail\BookingConfirmationMail;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\View\View;
 
 class PublicBookingController extends Controller
@@ -177,6 +181,12 @@ class PublicBookingController extends Controller
             ->where('ends_at',   '>', $today->copy()->utc()->toDateTimeString())
             ->get(['starts_at', 'ends_at']);
 
+        $pending = PendingBooking::where('employee_id', $employee->id)
+            ->where('expires_at', '>', now())
+            ->where('starts_at', '<', $rangeEnd->copy()->utc()->toDateTimeString())
+            ->where('ends_at',   '>', $today->copy()->utc()->toDateTimeString())
+            ->get(['starts_at', 'ends_at']);
+
         $duration = $service->duration_minutes;
         $days     = [];
 
@@ -209,6 +219,8 @@ class PublicBookingController extends Controller
                 if ($cursor->gte($now)) {
                     $conflict = $bookings->first(
                         fn($b) => $b->starts_at < $slotEnd && $b->ends_at > $cursor
+                    ) ?: $pending->first(
+                        fn($p) => $p->starts_at < $slotEnd && $p->ends_at > $cursor
                     );
                     if (!$conflict) {
                         $hasSlot = true;
@@ -276,13 +288,19 @@ class PublicBookingController extends Controller
 
             // Solo slots que empiezan ahora o en el futuro
             if ($cursor->gte($now)) {
-                $conflict = Booking::where('employee_id', $employee->id)
+                $conflictBody = Booking::where('employee_id', $employee->id)
                     ->whereIn('status', ['pending', 'confirmed'])
                     ->where('starts_at', '<', $slotEnd->copy()->utc()->toDateTimeString())
                     ->where('ends_at',   '>', $cursor->copy()->utc()->toDateTimeString())
                     ->exists();
 
-                if (!$conflict) {
+                $conflictPending = PendingBooking::where('employee_id', $employee->id)
+                    ->where('expires_at', '>', now())
+                    ->where('starts_at', '<', $slotEnd->copy()->utc()->toDateTimeString())
+                    ->where('ends_at',   '>', $cursor->copy()->utc()->toDateTimeString())
+                    ->exists();
+
+                if (!$conflictBody && !$conflictPending) {
                     $slots[] = $cursor->format('H:i');
                 }
             }
@@ -333,31 +351,93 @@ class PublicBookingController extends Controller
         $endsAt   = $startsAt->copy()->addMinutes($service->duration_minutes);
 
         // Final conflict check (comparar en UTC para evitar errores de timezone)
-        $conflict = Booking::where('employee_id', $employee->id)
+        $conflictBody = Booking::where('employee_id', $employee->id)
             ->whereIn('status', ['pending', 'confirmed'])
             ->where('starts_at', '<', $endsAt->copy()->utc()->toDateTimeString())
             ->where('ends_at',   '>', $startsAt->copy()->utc()->toDateTimeString())
             ->exists();
 
-        if ($conflict) {
+        $conflictPending = PendingBooking::where('employee_id', $employee->id)
+            ->where('expires_at', '>', now())
+            ->where('starts_at', '<', $endsAt->copy()->utc()->toDateTimeString())
+            ->where('ends_at',   '>', $startsAt->copy()->utc()->toDateTimeString())
+            ->exists();
+
+        if ($conflictBody || $conflictPending) {
             return back()
                 ->withErrors(['time' => 'Esta hora ya no está disponible. Por favor, elige otra.'])
                 ->withInput();
         }
 
-        Booking::create([
+        $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
+        $pending = PendingBooking::create([
             'user_id'        => $business->id,
             'employee_id'    => $employee->id,
             'service_id'     => $service->id,
             'price'          => $service->price,
             'customer_name'  => $data['customer_name'],
             'customer_phone' => $data['customer_phone'],
-            'customer_email' => $data['customer_email'] ?? null,
+            'customer_email' => $data['customer_email'],
             'starts_at'      => $startsAt->utc(),
             'ends_at'        => $endsAt->utc(),
-            'status'         => 'pending',
             'notes'          => $data['notes'] ?? null,
+            'verification_code' => $otp,
+            'expires_at'     => now()->addMinutes(20),
         ]);
+
+        Mail::to($pending->customer_email)->send(new BookingOtpMail($pending));
+
+        return redirect()->route('booking.verify', [$slug, $pending->id]);
+    }
+
+    public function showVerify(string $slug, PendingBooking $pending_booking): View
+    {
+        $business = User::where('business_slug', $slug)->firstOrFail();
+        
+        abort_if($pending_booking->isExpired(), 404, 'El tiempo de reserva ha expirado.');
+        
+        $pendingBooking = $pending_booking;
+        
+        return view('booking.verify', compact('business', 'pendingBooking'));
+    }
+
+    public function verifyCode(string $slug, Request $request, PendingBooking $pending_booking): RedirectResponse
+    {
+        $business = User::where('business_slug', $slug)->firstOrFail();
+
+        if ($pending_booking->isExpired()) {
+            return redirect()->route('booking.show', $slug)
+                ->withErrors(['error' => 'Tu reserva temporal ha expirado. Por favor, inténtalo de nuevo.']);
+        }
+
+        $data = $request->validate([
+            'code' => ['required', 'string', 'size:6'],
+        ]);
+
+        if (strtoupper($data['code']) !== strtoupper($pending_booking->verification_code)) {
+            return back()->withErrors(['code' => 'El código introducido no es correcto.']);
+        }
+
+        // Move to real bookings table
+        $booking = Booking::create([
+            'user_id'        => $pending_booking->user_id,
+            'employee_id'    => $pending_booking->employee_id,
+            'service_id'     => $pending_booking->service_id,
+            'price'          => $pending_booking->price,
+            'customer_name'  => $pending_booking->customer_name,
+            'customer_phone' => $pending_booking->customer_phone,
+            'customer_email' => $pending_booking->customer_email,
+            'starts_at'      => $pending_booking->starts_at,
+            'ends_at'        => $pending_booking->ends_at,
+            'status'         => 'pending',
+            'notes'          => $pending_booking->notes,
+        ]);
+
+        // Delete pending record
+        $pending_booking->delete();
+
+        Mail::to($booking->customer_email)->send(new BookingConfirmationMail($booking));
 
         return redirect()->route('booking.confirmed', $slug);
     }
