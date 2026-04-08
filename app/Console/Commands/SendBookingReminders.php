@@ -52,11 +52,12 @@ class SendBookingReminders extends Command
         foreach ($bookings as $booking) {
             $business = $booking->employee->user;
             
-            // Generar Signed URL de confirmación (caduca en 2 días o sin caducidad)
+            // Generar Signed URLs (caducan en 2 días o sin caducidad)
             $confirmationUrl = URL::signedRoute('booking.confirm', ['booking' => $booking->id]);
+            $cancellationUrl = URL::signedRoute('booking.cancel', ['booking' => $booking->id]);
 
             try {
-                Mail::to($booking->customer_email)->send(new BookingReminderMail($booking, $business, $confirmationUrl));
+                Mail::to($booking->customer_email)->send(new BookingReminderMail($booking, $business, $confirmationUrl, $cancellationUrl));
                 $this->info("Recordatorio enviado a {$booking->customer_email} para cita #{$booking->id}");
             } catch (\Exception $e) {
                 $this->error("Error al enviar email a {$booking->customer_email}: {$e->getMessage()}");

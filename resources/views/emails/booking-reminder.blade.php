@@ -69,7 +69,7 @@
             text-align: center;
             margin: 32px 0;
         }
-        .button {
+        .button-confirm {
             display: inline-block;
             background-color: #059669; /* emerald-600 */
             color: #ffffff;
@@ -78,6 +78,19 @@
             padding: 14px 32px;
             border-radius: 8px;
             font-size: 16px;
+            margin: 0 8px 16px 8px;
+        }
+        .button-cancel {
+            display: inline-block;
+            background-color: #ffffff;
+            color: #dc2626; /* red-600 */
+            font-weight: 600;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 15px;
+            border: 2px solid #dc2626;
+            margin: 0 8px 16px 8px;
         }
         .footer {
             background-color: #f1f5f9;
@@ -90,6 +103,13 @@
             color: #10b981;
             text-decoration: none;
             font-weight: 500;
+        }
+        .warning-text {
+            color: #94a3b8;
+            font-size: 12px;
+            text-align: center;
+            margin-top: -16px;
+            margin-bottom: 32px;
         }
     </style>
 </head>
@@ -110,13 +130,15 @@
                 <p><strong>Lugar:</strong> {{ $business->address ?: 'Consultar con el negocio' }}</p>
             </div>
             
-            <p>Por favor, haz clic en el siguiente botón para confirmar tu asistencia. Esto nos ayuda mucho a organizar nuestra agenda.</p>
+            <p>Por favor, confirma tu asistencia o cancela si no puedes asistir:</p>
             
             <div class="button-wrap">
-                <a href="{{ $confirmationUrl }}" class="button">Confirmar cita</a>
+                <a href="{{ $confirmationUrl }}" class="button-confirm">Confirmar cita</a>
+                <a href="{{ $cancellationUrl }}" class="button-cancel">Cancelar cita</a>
             </div>
+            <p class="warning-text">La cancelación es definitiva y liberará tu hueco para otro cliente.</p>
             
-            <p>Si no puedes asistir, por favor ponte en contacto con nosotros lo antes posible en el número <strong>{{ $business->phone }}</strong>.</p>
+            <p>Si tienes cualquier duda, puedes contactar con nosotros en el número <strong>{{ $business->phone }}</strong>.</p>
             
             <p>¡Gracias por confiar en nosotros!</p>
         </div>

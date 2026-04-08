@@ -108,8 +108,12 @@ class PublicBookingController extends Controller
             return response()->json([]);
         }
 
+        $start = Carbon::parse($request->date, $tz)->startOfDay()->utc();
+        $end   = Carbon::parse($request->date, $tz)->endOfDay()->utc();
+
         $bookings = Booking::where('employee_id', $employee->id)
-            ->whereDate('starts_at', $request->date)
+            ->where('starts_at', '>=', $start)
+            ->where('starts_at', '<=', $end)
             ->whereIn('status', ['pending', 'confirmed'])
             ->with('service')
             ->orderBy('starts_at')
@@ -349,8 +353,8 @@ class PublicBookingController extends Controller
             'customer_name'  => $data['customer_name'],
             'customer_phone' => $data['customer_phone'],
             'customer_email' => $data['customer_email'] ?? null,
-            'starts_at'      => $startsAt,
-            'ends_at'        => $endsAt,
+            'starts_at'      => $startsAt->utc(),
+            'ends_at'        => $endsAt->utc(),
             'status'         => 'pending',
             'notes'          => $data['notes'] ?? null,
         ]);

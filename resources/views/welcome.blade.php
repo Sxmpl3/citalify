@@ -386,7 +386,7 @@
                     </svg>
                 </div>
                 <span class="text-xs font-bold uppercase tracking-widest text-emerald-700">El más valorado</span>
-                <h3 class="font-bold text-lg mb-2 mt-1 text-slate-800">Recordatorios por WhatsApp</h3>
+                <h3 class="font-bold text-lg mb-2 mt-1 text-slate-800">Recordatorios por Email</h3>
                 <p class="text-sm leading-relaxed text-slate-600">24h antes de cada cita, tu cliente recibe un mensaje automático. Puede confirmar o cancelar con una respuesta. Tu agenda se actualiza sola.</p>
             </div>
         </div>
@@ -407,7 +407,7 @@
             @foreach([
                 ['01', 'Crea tu cuenta', 'Regístrate en 30 segundos. En el siguiente paso configuras el nombre de tu negocio, tus servicios y tu horario semanal.'],
                 ['02', 'Comparte tu enlace', 'Copia tu URL única y ponla en tu Instagram, en tu web o mándala por WhatsApp. Ellos ven tu disponibilidad real y reservan solos.'],
-                ['03', 'Recibe reservas y olvídate', 'citalify envía recordatorios automáticos por WhatsApp 24h antes. Si el cliente cancela, recibes un aviso al instante y el hueco queda libre.'],
+                ['03', 'Recibe reservas y olvídate', 'Citalify envía recordatorios automáticos por Email 24h antes. Si el cliente cancela, recibes un aviso al instante y el hueco queda libre.'],
             ] as [$num, $title, $desc])
             <div class="flex gap-6 items-start group">
                 <div class="relative shrink-0 w-16 h-16 rounded-2xl flex items-center justify-center font-display font-bold text-xl bg-gradient-to-br from-emerald-50 to-emerald-100 text-emerald-700 transition-all duration-300 group-hover:scale-105 group-hover:shadow-md">
@@ -459,7 +459,7 @@
                 <h3 class="font-bold text-xl mb-2 text-slate-800">Básico</h3>
                 <p class="text-sm mb-6 text-slate-600">Para autónomos con agenda personal</p>
                 <div class="mb-8">
-                    <span class="font-display text-5xl font-bold text-slate-800">4,99€</span>
+                    <span class="font-display text-5xl font-bold text-slate-800">6,99€</span>
                     <span class="text-sm text-slate-500">/mes</span>
                 </div>
                 <ul class="space-y-4 text-sm mb-8 text-slate-600 flex-1">
@@ -485,7 +485,7 @@
                 </div>
                 <p class="text-sm mb-6 text-slate-600">Para negocios que quieren reducir ausencias</p>
                 <div class="mb-8">
-                    <span class="font-display text-5xl font-bold text-slate-800">14,99€</span>
+                    <span class="font-display text-5xl font-bold text-slate-800">19,99€</span>
                     <span class="text-sm text-slate-500">/mes</span>
                 </div>
                 <div class="opacity-30 select-none pointer-events-none flex-1 flex flex-col" style="filter: blur(5px);">
@@ -514,7 +514,7 @@
             <span class="text-emerald-400">2 horas a la semana?</span>
         </h2>
         <p class="text-lg mb-10 text-slate-400">
-            Con citalify dejas de gestionar citas por teléfono, reduces las ausencias y tienes control total de tu agenda. Desde 4,99€ al mes.
+            Con citalify dejas de gestionar citas por teléfono, reduces las ausencias y tienes control total de tu agenda. Desde 6,99€ al mes.
         </p>
         <a href="{{ route('register') }}" class="btn-primary inline-block px-10 py-4 text-lg rounded-xl">
             Prueba 30 días gratis

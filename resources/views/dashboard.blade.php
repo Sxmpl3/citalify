@@ -89,14 +89,20 @@
                     </div>
                 @else
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @php $tz = auth()->user()->timezone ?? 'Europe/Madrid'; @endphp
                         @foreach($todayBookings as $booking)
-                            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex gap-4 items-start relative overflow-hidden group">
-                                <div class="text-center w-12 shrink-0 pt-0.5">
-                                    <p class="text-lg font-bold text-slate-700 leading-none">{{ \Carbon\Carbon::parse($booking->starts_at)->format('H:i') }}</p>
-                                    <p class="text-xs text-slate-400 mt-1">{{ \Carbon\Carbon::parse($booking->ends_at)->format('H:i') }}</p>
+                            <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 flex items-center gap-4 relative overflow-hidden group">
+                                {{-- Time --}}
+                                <div class="text-center w-14 shrink-0 transition-transform group-hover:scale-105">
+                                    <p class="text-lg font-bold text-slate-700 leading-none">{{ \Carbon\Carbon::parse($booking->starts_at)->setTimezone($tz)->format('H:i') }}</p>
+                                    <p class="text-xs text-slate-400 mt-1.5">{{ \Carbon\Carbon::parse($booking->ends_at)->setTimezone($tz)->format('H:i') }}</p>
                                 </div>
-                                <div class="w-1 h-full absolute left-16 top-0 bg-emerald-400 shrink-0"></div>
-                                <div class="flex-1 min-w-0 pl-3">
+
+                                {{-- Separator Bar --}}
+                                <div class="w-1 h-10 bg-emerald-400 rounded-full shrink-0"></div>
+
+                                {{-- Details --}}
+                                <div class="flex-1 min-w-0">
                                     <p class="font-semibold text-slate-800 truncate">{{ $booking->customer_name }}</p>
                                     <p class="text-sm text-slate-500 truncate">{{ $booking->service->name ?? 'Servicio' }}</p>
                                     @if($booking->notes)

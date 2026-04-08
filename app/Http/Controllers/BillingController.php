@@ -22,9 +22,13 @@ class BillingController extends Controller
             ? Carbon::parse($request->input('end_date'), $tz)->endOfDay()
             : $now->copy()->endOfMonth();
 
+        $startToday = $now->copy()->startOfDay()->utc();
+        $endToday   = $now->copy()->endOfDay()->utc();
+
         $todayRevenue = Booking::where('user_id', $user->id)
             ->where('status', 'confirmed')
-            ->whereDate('starts_at', $now->toDateString())
+            ->where('starts_at', '>=', $startToday)
+            ->where('starts_at', '<=', $endToday)
             ->sum('price');
             
         $weekRevenue = Booking::where('user_id', $user->id)

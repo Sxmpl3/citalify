@@ -3,33 +3,24 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\Booking;
-use App\Models\User;
 
-class BookingReminderMail extends Mailable
+class BookingCancelledOwnerMail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $booking;
-    public $business;
-    public $confirmationUrl;
-    public $cancellationUrl;
 
     /**
      * Create a new message instance.
      */
-    public function __construct(Booking $booking, User $business, string $confirmationUrl, string $cancellationUrl)
+    public function __construct(Booking $booking)
     {
         $this->booking = $booking;
-        $this->business = $business;
-        $this->confirmationUrl = $confirmationUrl;
-        $this->cancellationUrl = $cancellationUrl;
     }
 
     /**
@@ -38,7 +29,7 @@ class BookingReminderMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Recordatorio de tu cita mañana en ' . $this->business->business_name,
+            subject: 'AVISO: Un cliente ha cancelado su cita de mañana',
         );
     }
 
@@ -48,14 +39,14 @@ class BookingReminderMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.booking-reminder',
+            view: 'emails.booking-cancelled-owner',
         );
     }
 
     /**
      * Get the attachments for the message.
      *
-     * @return array<int, Attachment>
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
      */
     public function attachments(): array
     {

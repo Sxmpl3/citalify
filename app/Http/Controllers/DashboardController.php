@@ -12,12 +12,14 @@ class DashboardController extends Controller
     public function index(): View
     {
         $user = auth()->user();
-        $tz   = $user->timezone ?? 'Europe/Madrid';
-        $now  = Carbon::now($tz);
-        $today = Carbon::today($tz);
+        $tz    = $user->timezone ?? 'Europe/Madrid';
+        $now   = Carbon::now($tz);
+        $start = Carbon::today($tz)->startOfDay()->utc();
+        $end   = Carbon::today($tz)->endOfDay()->utc();
 
         $todayBookings = Booking::where('user_id', $user->id)
-            ->whereDate('starts_at', $today)
+            ->where('starts_at', '>=', $start)
+            ->where('starts_at', '<=', $end)
             ->whereIn('status', ['pending', 'confirmed'])
             ->with(['service', 'employee'])
             ->orderBy('starts_at')
@@ -68,6 +70,19 @@ class DashboardController extends Controller
         $startsAt = Carbon::parse($data['date'] . ' ' . $data['time'], $tz);
         $endsAt   = $startsAt->copy()->addMinutes($service->duration_minutes);
 
+        // Check for conflicts
+        $conflict = Booking::where('employee_id', $employee->id)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->where('starts_at', '<', $endsAt->copy()->utc()->toDateTimeString())
+            ->where('ends_at',   '>', $startsAt->copy()->utc()->toDateTimeString())
+            ->exists();
+
+        if ($conflict) {
+            return back()
+                ->withErrors(['time' => 'Este horario ya está ocupado por otra cita.'])
+                ->withInput();
+        }
+
         Booking::create([
             'user_id'        => $user->id,
             'employee_id'    => $employee->id,
@@ -76,8 +91,8 @@ class DashboardController extends Controller
             'customer_name'  => $data['customer_name'],
             'customer_phone' => $data['customer_phone'] ?? '',
             'customer_email' => $data['customer_email'],
-            'starts_at'      => $startsAt,
-            'ends_at'        => $endsAt,
+            'starts_at'      => $startsAt->utc(),
+            'ends_at'        => $endsAt->utc(),
             'status'         => 'confirmed',
             'notes'          => $data['notes'],
         ]);
@@ -143,8 +158,12 @@ class DashboardController extends Controller
             }
 
             if ($wasOpen && $isNowClosed) {
+                $startRange = \Carbon\Carbon::parse($formattedDate, $tz)->startOfDay()->utc();
+                $endRange   = \Carbon\Carbon::parse($formattedDate, $tz)->endOfDay()->utc();
+
                 $bookings = \App\Models\Booking::where('employee_id', $employee->id)
-                    ->whereDate('starts_at', $formattedDate)
+                    ->where('starts_at', '>=', $startRange)
+                    ->where('starts_at', '<=', $endRange)
                     ->whereIn('status', ['pending', 'confirmed'])
                     ->with('service')
                     ->get();

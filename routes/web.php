@@ -48,6 +48,10 @@ Route::get('/confirmar-cita/{booking}', [\App\Http\Controllers\BookingConfirmati
     ->name('booking.confirm')
     ->middleware('signed');
 
+Route::get('/cancelar-cita/{booking}', [\App\Http\Controllers\BookingConfirmationController::class, 'cancel'])
+    ->name('booking.cancel')
+    ->middleware('signed');
+
 // Página pública de reservas — al final para no colisionar con rutas anteriores
 Route::get('/{slug}/confirmada',    [PublicBookingController::class, 'confirmed'])->name('booking.confirmed');
 Route::get('/{slug}/calendario',    [PublicBookingController::class, 'calendar'])->name('booking.calendar');
