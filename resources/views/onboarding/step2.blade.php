@@ -90,7 +90,6 @@
                                         required
                                         class="w-full rounded-xl border-slate-300 text-sm focus:border-emerald-500 focus:ring-emerald-500 bg-white shadow-sm pr-8"
                                     >
-                                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">€</span>
                                 </div>
                             </div>
                         </div>
