@@ -70,7 +70,8 @@
                         <div x-show="editing" class="p-5 border-t border-slate-50">
                             <p class="text-sm font-semibold text-slate-600 mb-4">Editando servicio</p>
 
-                            <form method="POST" action="{{ route('services.update', $service) }}">
+                            {{-- Formulario de actualización separado --}}
+                            <form method="POST" action="{{ route('services.update', $service) }}" id="update-form-{{ $service->id }}">
                                 @csrf
                                 @method('PATCH')
 
@@ -111,7 +112,6 @@
                                             <input type="color" name="color" x-model="color"
                                                    class="h-9 w-14 rounded-lg border-slate-300 cursor-pointer p-0.5">
                                             <span class="text-xs text-slate-400" x-text="color"></span>
-                                            <input type="hidden" name="color" x-model="color">
                                         </div>
                                     </div>
 
@@ -132,42 +132,44 @@
                                         </label>
                                     </div>
                                 </div>
+                            </form>
 
-                                <div class="flex items-center gap-3 pt-3 border-t border-slate-100">
-                                    <button type="submit"
-                                            class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-semibold text-sm py-2.5 px-5 rounded-xl shadow-sm transition-all">
-                                        Guardar cambios
-                                    </button>
-                                    <button type="button" @click="editing = false"
-                                            class="text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors">
-                                        Cancelar
-                                    </button>
+                            {{-- Footer con controles - Fuera del <form> de actualización para evitar anidamiento --}}
+                            <div class="flex items-center gap-3 pt-3 border-t border-slate-100">
+                                <button type="submit" form="update-form-{{ $service->id }}"
+                                        class="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-semibold text-sm py-2.5 px-5 rounded-xl shadow-sm transition-all">
+                                    Guardar cambios
+                                </button>
+                                <button type="button" @click="editing = false"
+                                        class="text-sm text-slate-500 hover:text-slate-700 font-medium transition-colors">
+                                    Cancelar
+                                </button>
 
-                                    {{-- Eliminar --}}
-                                    <div class="ml-auto" x-data="{ confirm: false }">
-                                        <button type="button" x-show="!confirm"
-                                                @click="confirm = true"
-                                                class="text-sm text-red-400 hover:text-red-600 font-medium transition-colors">
-                                            Eliminar
-                                        </button>
-                                        <div x-show="confirm" class="flex items-center gap-2">
-                                            <span class="text-xs text-red-500 font-medium">¿Seguro?</span>
-                                            <form method="POST" action="{{ route('services.destroy', $service) }}" class="inline">
-                                                @csrf @method('DELETE')
-                                                <button type="submit"
-                                                        class="text-xs font-semibold text-white bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded-lg transition-colors">
-                                                    Sí, eliminar
-                                                </button>
-                                            </form>
-                                            <button type="button" @click="confirm = false"
-                                                    class="text-xs text-slate-400 hover:text-slate-600 font-medium transition-colors">
-                                                No
+                                {{-- Eliminar - Formulario independiente --}}
+                                <div class="ml-auto" x-data="{ confirm: false }">
+                                    <button type="button" x-show="!confirm"
+                                            @click="confirm = true"
+                                            class="text-sm text-red-400 hover:text-red-600 font-medium transition-colors">
+                                        Eliminar
+                                    </button>
+                                    <div x-show="confirm" class="flex items-center gap-2">
+                                        <span class="text-xs text-red-500 font-medium">¿Seguro?</span>
+                                        <form method="POST" action="{{ route('services.destroy', $service) }}" class="inline">
+                                            @csrf @method('DELETE')
+                                            <button type="submit"
+                                                    class="text-xs font-semibold text-white bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded-lg transition-colors">
+                                                Sí, eliminar
                                             </button>
-                                        </div>
+                                        </form>
+                                        <button type="button" @click="confirm = false"
+                                                class="text-xs text-slate-400 hover:text-slate-600 font-medium transition-colors">
+                                            No
+                                        </button>
                                     </div>
                                 </div>
-                            </form>
+                            </div>
                         </div>
+
                     </div>
                 @endforeach
             @endif
