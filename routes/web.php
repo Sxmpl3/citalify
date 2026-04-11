@@ -4,6 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicBookingController;
+use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\ServiceController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,6 +16,9 @@ Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/dashboard/horario', [DashboardController::class, 'updateSchedule'])->name('dashboard.schedule.update');
     Route::post('/dashboard/horario-semanal', [DashboardController::class, 'updateWeeklySchedule'])->name('dashboard.weekly-schedule.update');
+
+    Route::get('/horario',  [ScheduleController::class, 'edit'])->name('schedule.edit');
+    Route::put('/horario',  [ScheduleController::class, 'update'])->name('schedule.update');
     Route::post('/dashboard/citas', [DashboardController::class, 'storeManual'])->name('dashboard.bookings.store');
     Route::delete('/dashboard/citas/{booking}', [DashboardController::class, 'cancel'])->name('dashboard.bookings.cancel');
     Route::patch('/dashboard/citas/{booking}/confirm', [DashboardController::class, 'confirm'])->name('dashboard.bookings.confirm');

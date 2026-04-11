@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('employee_id')->constrained()->cascadeOnDelete();
             $table->foreignId('service_id')->constrained()->cascadeOnDelete();
+            $table->decimal('price', 8, 2)->default(0);
             $table->string('customer_name');
             $table->string('customer_phone');
             $table->string('customer_email')->nullable();

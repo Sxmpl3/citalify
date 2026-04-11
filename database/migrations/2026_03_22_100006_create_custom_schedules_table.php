@@ -14,6 +14,8 @@ return new class extends Migration
             $table->date('date');
             $table->time('open_time')->nullable();
             $table->time('close_time')->nullable();
+            $table->time('break_start')->nullable();
+            $table->time('break_end')->nullable();
             $table->boolean('is_closed')->default(false);
             $table->timestamps();
 

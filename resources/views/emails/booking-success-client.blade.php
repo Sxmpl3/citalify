@@ -15,7 +15,7 @@
         .reminder-box { background-color: #f0fdf4; border-left: 4px solid #10b981; padding: 16px; border-radius: 0 8px 8px 0; margin-top: 24px; font-size: 14px; }
         .button-container { text-align: center; margin-top: 32px; }
         .button { display: inline-block; background-color: #059669; color: #ffffff; padding: 16px 32px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 16px; transition: background-color 0.2s; }
-        .footer { background-color: #f1f5f9; padding: 24px; text-align: center; font-size: 13px; color: #64748b; }
+        .footer { background-color: #f1f5f9; padding: 24px; text-align: center; font-size: 13px; color: #ffffffff; }
     </style>
 </head>
 <body>
@@ -33,7 +33,7 @@
             </div>
 
             <div class="button-container">
-                <a href="{{ route('customer.login') }}" class="button">Gestionar mis reservas</a>
+                <a href="{{ route('customer.login') }}" class="button" style>Gestionar mis reservas</a>
             </div>
 
             <div class="reminder-box">

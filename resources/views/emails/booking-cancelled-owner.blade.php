@@ -20,7 +20,7 @@
         </div>
         <div class="content">
             <p>Hola <strong>{{ $booking->user->name }}</strong>,</p>
-            <p>Un cliente ha cancelado su cita de mañana a través del email de recordatorio:</p>
+            <p>Un cliente ha cancelado una cita:</p>
             
             <div class="details-box">
                 <p><strong>Cliente:</strong> {{ $booking->customer_name }}</p>

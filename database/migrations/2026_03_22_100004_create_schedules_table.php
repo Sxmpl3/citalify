@@ -17,6 +17,8 @@ return new class extends Migration
             $table->unsignedTinyInteger('day_of_week'); // 0=Domingo, 1=Lunes, ..., 6=Sábado
             $table->time('open_time');
             $table->time('close_time');
+            $table->time('break_start')->nullable();
+            $table->time('break_end')->nullable();
             $table->timestamps();
 
             $table->unique(['employee_id', 'day_of_week']);

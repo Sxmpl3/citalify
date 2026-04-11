@@ -17,6 +17,21 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            // Business Fields
+            $table->string('business_name')->nullable();
+            $table->string('business_slug')->nullable()->unique();
+            $table->string('phone')->nullable();
+            $table->string('logo')->nullable();
+            $table->string('address')->nullable();
+            $table->string('timezone')->default('Europe/Madrid');
+            $table->foreignId('plan_id')->nullable()->constrained('plans');
+            $table->string('stripe_customer_id')->nullable();
+            $table->timestamp('trial_ends_at')->nullable();
+            $table->boolean('onboarding_completed')->default(false);
+            $table->integer('booking_days_ahead')->default(14);
+            $table->string('schedule_type')->default('normal');
+
             $table->rememberToken();
             $table->timestamps();
         });

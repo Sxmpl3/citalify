@@ -20,7 +20,7 @@
                      let loc = new Date(d.getTime() - (d.getTimezoneOffset() * 60000));
                      let dateStr = loc.toISOString().split('T')[0];
                      let label = d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
-                     arr.push({ date: dateStr, label: label, active: true, open: '09:00', close: '19:00', hasBreak: false, breakStart: '14:00', breakEnd: '15:00' });
+                     arr.push({ date: dateStr, label: label, active: true, open: '09:00', close: '19:00' });
                      d.setDate(d.getDate() + 1);
                  }
                  this.customDays = arr;
@@ -62,10 +62,6 @@
                          if (d.active) {
                              add('custom_schedules[' + idx + '][open]', d.open);
                              add('custom_schedules[' + idx + '][close]', d.close);
-                             if (d.hasBreak) {
-                                 add('custom_schedules[' + idx + '][break_start]', d.breakStart);
-                                 add('custom_schedules[' + idx + '][break_end]', d.breakEnd);
-                             }
                          }
                          idx++;
                      });
@@ -87,10 +83,6 @@
                  } else {
                      this.customDays.forEach(d => {
                         if (d.active) {
-                            if (d.hasBreak && d.breakStart >= d.breakEnd) {
-                                alert('El descanso del ' + d.label + ' debe terminar después de empezar.');
-                                error = true;
-                            }
                             if (d.open >= d.close) {
                                 alert('El horario del ' + d.label + ' es inválido.');
                                 error = true;
@@ -249,33 +241,11 @@
                                     <span class="text-gray-400 text-sm font-medium">a</span>
                                     <input type="time" x-model="d.close" 
                                            class="flex-1 sm:flex-none rounded-xl border-slate-300 text-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white">
-
-                                    {{-- Toggle Descanso --}}
-                                    <label class="flex items-center gap-2 cursor-pointer ml-2 select-none shrink-0">
-                                        <div class="relative">
-                                            <input type="checkbox" x-model="d.hasBreak" class="sr-only">
-                                            <div class="w-8 h-4 rounded-full transition-colors"
-                                                 :class="d.hasBreak ? 'bg-amber-500' : 'bg-slate-300'"></div>
-                                            <div class="absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform"
-                                                 :class="d.hasBreak ? 'translate-x-4' : 'translate-x-0'"></div>
-                                        </div>
-                                        <span class="text-xs font-medium text-slate-500">Descanso</span>
-                                    </label>
                                 </div>
                             </template>
                             <template x-if="!d.active">
                                 <span class="text-sm text-gray-400 font-medium italic">Cerrado</span>
                             </template>
-                        </div>
-
-                        {{-- Franja de descanso --}}
-                        <div x-show="d.active && d.hasBreak" x-transition class="flex items-center gap-3 pl-0 sm:pl-32 pt-1 pb-1">
-                            <span class="text-xs font-medium text-amber-600 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg shrink-0">Descanso</span>
-                            <input type="time" x-model="d.breakStart"
-                                   class="flex-1 sm:flex-none rounded-xl border-amber-300 text-sm focus:border-amber-500 focus:ring-amber-500 bg-white text-amber-700">
-                            <span class="text-gray-400 text-sm font-medium">a</span>
-                            <input type="time" x-model="d.breakEnd"
-                                   class="flex-1 sm:flex-none rounded-xl border-amber-300 text-sm focus:border-amber-500 focus:ring-amber-500 bg-white text-amber-700">
                         </div>
                     </div>
                 </template>
