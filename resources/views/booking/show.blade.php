@@ -192,10 +192,7 @@
                                 <p class="text-sm text-slate-400 mt-0.5" x-text="svc.duration_minutes + ' min'"></p>
                             </div>
                             <div class="text-right shrink-0 ml-4">
-                                <p class="font-bold text-slate-700" x-text="price(svc)"></p>
-                                <svg class="w-5 h-5 text-slate-300 group-hover:text-emerald-500 transition-colors ml-auto mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                                </svg>
+                                <p class="font-bold text-slate-700" x-text="price(svc)"></p> 
                             </div>
                         </button>
                     </template>
