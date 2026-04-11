@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>citalify — Reservas online y recordatorios WhatsApp para tu negocio</title>
-    <meta name="description" content="Gestiona tus citas online y reduce las ausencias hasta un 60% con recordatorios automáticos por WhatsApp. Para peluquerías, clínicas, fisioterapeutas y más.">
+    <title>citalify — Reservas online y recordatorios Email para tu negocio</title>
+    <meta name="description" content="Gestiona tus citas online y reduce las ausencias hasta un 60% con recordatorios automáticos por Email. Para peluquerías, clínicas, fisioterapeutas y más.">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=dm-sans:400,500,600,700,800|outfit:600,700,800&display=swap" rel="stylesheet"/>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -272,7 +272,7 @@
         </h1>
 
         <p class="fade-up delay-2 text-lg sm:text-xl max-w-2xl mx-auto mb-10 leading-relaxed" style="color:var(--muted)">
-            Página de reservas propia, panel de agenda y recordatorios automáticos por WhatsApp.
+            Página de reservas propia, panel de agenda y recordatorios automáticos por Email.
             Reduce las ausencias hasta un <strong class="text-slate-800">60%</strong> y olvídate de gestionar citas por teléfono.
         </p>
 
