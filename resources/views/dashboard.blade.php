@@ -345,7 +345,7 @@
 
                                     <button type="button" @click.stop="console.log('Button clicked', b); openCancel(b)"
                                         class="text-xs text-red-500 hover:text-red-700 underline underline-offset-2 font-medium">
-                                        Cancelar cita
+                                        Cancelar
                                     </button>
                                 </div>
                             </div>
