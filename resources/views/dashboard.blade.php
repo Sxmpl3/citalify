@@ -182,11 +182,11 @@
                                             </button>
                                         </form>
                                     @endif
-                                    <button @click="bookingToCancel = {
+                                    <button type="button" @click.stop="openCancel({
                                                 id: {{ $booking->id }},
-                                                customer_name: '{{ addslashes($booking->customer_name) }}',
-                                                customer_email: '{{ addslashes($booking->customer_email ?? '') }}'
-                                            }"
+                                                customer_name: {{ json_encode($booking->customer_name) }},
+                                                customer_email: {{ json_encode($booking->customer_email ?? '') }}
+                                            })"
                                         class="text-xs text-red-500 hover:text-red-700 underline underline-offset-2 transition-opacity font-medium bg-red-50 px-2 py-1 rounded">
                                         Cancelar
                                     </button>
@@ -343,7 +343,7 @@
                                         </button>
                                     </form>
 
-                                    <button @click="bookingToCancel = b"
+                                    <button type="button" @click.stop="console.log('Button clicked', b); openCancel(b)"
                                         class="text-xs text-red-500 hover:text-red-700 underline underline-offset-2 font-medium">
                                         Cancelar cita
                                     </button>
@@ -584,13 +584,14 @@
                         </form>
                     </div>
                 </div>
+            </div>
 
                 <!-- Modal Cancelar -->
-                <div x-show="bookingToCancel"
-                    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
+                <div x-show="openCancelModal" style="display: none;"
+                    class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4"
                     x-transition.opacity>
                     <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden"
-                        @click.outside="bookingToCancel = null" x-transition>
+                        @click.outside="openCancelModal = false" x-transition>
                         <div class="p-6">
                             <div
                                 class="w-12 h-12 rounded-full bg-red-50 text-red-500 flex items-center justify-center mb-4 mx-auto">
@@ -601,14 +602,14 @@
                             </div>
                             <h3 class="font-bold text-lg text-slate-800 text-center mb-2">¿Cancelar Cita?</h3>
                             <p class="text-sm text-slate-500 text-center mb-6">Vas a cancelar la cita de <strong
-                                    x-text="bookingToCancel?.customer_name"></strong>. Visualmente el bloque volverá a
+                                    x-text="bookingToCancel ? bookingToCancel.customer_name : ''"></strong>. Visualmente el bloque volverá a
                                 estar disponible.</p>
 
-                            <form :action="'{{ url('dashboard/citas') }}/' + bookingToCancel?.id" method="POST">
+                            <form :action="'{{ url('dashboard/citas') }}/' + (bookingToCancel ? bookingToCancel.id : '')" method="POST">
                                 @csrf
                                 @method('DELETE')
 
-                                <template x-if="bookingToCancel?.customer_email">
+                                <template x-if="bookingToCancel && bookingToCancel.customer_email">
                                     <label
                                         class="flex items-start gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100 mb-6 cursor-pointer hover:bg-slate-100 transition-colors">
                                         <input type="checkbox" name="blacklist" value="1"
@@ -619,7 +620,7 @@
                                 </template>
 
                                 <div class="flex justify-between gap-3">
-                                    <button type="button" @click="bookingToCancel = null"
+                                    <button type="button" @click="openCancelModal = false"
                                         class="flex-1 px-4 py-2.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Atrás</button>
                                     <button type="submit"
                                         class="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 text-sm font-medium rounded-xl shadow-sm transition-colors">Sí,
@@ -630,7 +631,6 @@
                     </div>
                 </div>
 
-            </div>
         </div>
 
         @push('scripts')
@@ -647,6 +647,7 @@
                         loadingDay: false,
                         openAddModal: false,
                         openConfigModal: false,
+                        openCancelModal: false,
                         modalOpen: true,
                         modalOpenTime: '09:00',
                         modalCloseTime: '19:00',
@@ -665,6 +666,13 @@
                             await this.loadCalendar();
                             this.$watch('addModalDate', () => this.loadAddModalSlots());
                             this.$watch('addModalServiceId', () => this.loadAddModalCalendar());
+                        },
+
+                        openCancel(bookingData) {
+                            console.log('openCancel function called with data:', bookingData);
+                            this.bookingToCancel = bookingData;
+                            this.openCancelModal = true;
+                            console.log('openCancelModal is now:', this.openCancelModal);
                         },
 
                         async loadAddModalCalendar() {

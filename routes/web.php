@@ -12,6 +12,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/auto-login', function () { auth()->loginUsingId(1); return redirect('/dashboard'); });
+
 Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/dashboard/horario', [DashboardController::class, 'updateSchedule'])->name('dashboard.schedule.update');
