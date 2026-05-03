@@ -34,11 +34,12 @@
                         @if(auth()->user()->plan_id)
                             <div class="mt-6 space-y-4">
                                 <p class="text-sm text-slate-600">
-                                    Tienes un plan activo. Si cancelas, tu agenda dejará de ser visible para los clientes inmediatamente.
+                                    Tienes un plan activo. Si cancelas, tu agenda dejará de ser visible para los clientes inmediatamente. 
+                                    <span class="font-bold text-red-600">Ten en cuenta que no se realizarán reembolsos por el importe ya abonado.</span>
                                 </p>
                                 <form method="post" action="{{ route('subscription.cancel') }}">
                                     @csrf
-                                    <x-danger-button onclick="return confirm('¿Estás seguro de que deseas cancelar tu plan? Tu negocio quedará inactivo.')">
+                                    <x-danger-button onclick="return confirm('¿Estás seguro de que deseas cancelar tu plan? Tu negocio quedará inactivo de inmediato y no se reembolsará el dinero abonado.')">
                                         Cancelar Plan Actual
                                     </x-danger-button>
                                 </form>

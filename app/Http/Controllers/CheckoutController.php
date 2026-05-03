@@ -14,6 +14,11 @@ class CheckoutController extends Controller
 
         Stripe::setApiKey(env('STRIPE_SECRET'));
 
+        $subscription_data = [];
+        if (! $user->hasHadTrial()) {
+            $subscription_data['trial_period_days'] = 30;
+        }
+
         $checkout_session = Session::create([
             'payment_method_types' => ['card'],
             'line_items' => [[
@@ -25,9 +30,7 @@ class CheckoutController extends Controller
             'cancel_url' => route('register'), // Optional: where to go if they cancel
             'customer_email' => $user->email,
             'client_reference_id' => $user->id,
-            'subscription_data' => [
-                'trial_period_days' => 30,
-            ],
+            'subscription_data' => $subscription_data,
         ]);
 
         return redirect()->away($checkout_session->url);
@@ -44,14 +47,20 @@ class CheckoutController extends Controller
                 $user = auth()->user();
 
                 if ($session->payment_status === 'paid' || $session->status === 'complete') {
-                    if (! $user->trial_ends_at) {
-                        $user->update([
-                            'stripe_customer_id' => $session->customer,
-                            'trial_ends_at' => now()->addDays(30),
-                            'plan_id' => \App\Models\Plan::where('slug', 'basico')->first()?->id ?? \App\Models\Plan::first()?->id ?? null,
-                        ]);
+                    $updateData = [
+                        'stripe_customer_id' => $session->customer,
+                        'plan_id' => \App\Models\Plan::where('slug', 'basico')->first()?->id ?? \App\Models\Plan::first()?->id ?? null,
+                    ];
 
-                        // Generar y enviar factura inicial (Prueba gratuita)
+                    // Solo establecemos trial_ends_at si no tenía uno previo
+                    if (! $user->trial_ends_at) {
+                        $updateData['trial_ends_at'] = now()->addDays(30);
+                    }
+
+                    $user->update($updateData);
+
+                    // Si es su primera vez (nueva prueba), enviamos la factura de $0
+                    if (isset($updateData['trial_ends_at'])) {
                         $invoiceData = [
                             'amount' => 0,
                             'date' => now()->format('d/m/Y'),
@@ -76,7 +85,16 @@ class CheckoutController extends Controller
             }
         }
 
-        return redirect()->route('onboarding.step', 1)
-            ->with('status', '¡Suscripción iniciada correctamente! Tienes 30 días de prueba.');
+        $user = auth()->user();
+        $message = $user->hasHadTrial() 
+            ? '¡Suscripción iniciada correctamente!' 
+            : '¡Suscripción iniciada correctamente! Tienes 30 días de prueba.';
+
+        // Si ya completó el onboarding, al dashboard. Si no, al onboarding.
+        $redirectRoute = $user->onboarding_completed ? 'dashboard' : 'onboarding.step';
+        $redirectParams = $user->onboarding_completed ? [] : ['step' => 1];
+
+        return redirect()->route($redirectRoute, $redirectParams)
+            ->with('status', $message);
     }
 }

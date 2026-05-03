@@ -17,7 +17,7 @@ class EnsureOnboardingComplete
     {
         $user = $request->user();
 
-        if ($user && ! $user->trial_ends_at && ! $request->routeIs('checkout.*') && ! $request->routeIs('stripe.*') && ! $request->routeIs('logout')) {
+        if ($user && ! $user->plan_id && ! $request->routeIs('checkout.*') && ! $request->routeIs('stripe.*') && ! $request->routeIs('logout')) {
             return redirect()->route('checkout.redirect');
         }
 

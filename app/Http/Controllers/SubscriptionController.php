@@ -49,10 +49,9 @@ class SubscriptionController extends Controller
                 }
             }
 
-            // Actualizamos nuestra base de datos local
+            // Actualizamos nuestra base de datos local (mantenemos trial_ends_at como registro)
             $user->update([
                 'plan_id' => null,
-                'trial_ends_at' => null,
             ]);
 
             // Cerramos la sesión

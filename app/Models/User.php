@@ -73,6 +73,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->trial_ends_at !== null && $this->trial_ends_at->isFuture();
     }
 
+    public function hasHadTrial(): bool
+    {
+        return $this->trial_ends_at !== null;
+    }
+
     /**
      * Send the email verification notification.
      *
