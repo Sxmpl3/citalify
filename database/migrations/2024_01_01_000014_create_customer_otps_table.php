@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customer_otps', function (Blueprint $col) {
-            $col->id();
-            $col->string('email');
-            $col->string('code', 6);
-            $col->timestamp('expires_at');
-            $col->timestamps();
+        if (!Schema::hasTable('customer_otps')) {
+            Schema::create('customer_otps', function (Blueprint $col) {
+                $col->id();
+                $col->string('email');
+                $col->string('code', 6);
+                $col->timestamp('expires_at');
+                $col->timestamps();
 
-            $col->index('email');
-        });
+                $col->index('email');
+            });
+        }
     }
 
     /**

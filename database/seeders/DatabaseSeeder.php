@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
                 'slug' => 'basico',
                 'price_monthly' => 9.99,
                 'max_employees' => 1,
-                'max_bookings_monthly' => 100,
+                'max_bookings_monthly' => 500,
                 'whatsapp_reminders' => false,
                 'statistics' => false,
                 'advanced_statistics' => false,
