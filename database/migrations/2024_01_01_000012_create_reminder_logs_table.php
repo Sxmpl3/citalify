@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('reminder_logs', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('booking_id')->constrained()->cascadeOnDelete();
-            $table->enum('channel', ['whatsapp', 'sms', 'email']);
-            $table->timestamp('sent_at')->nullable();
-            $table->string('status')->nullable();
-            $table->text('response')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('reminder_logs')) {
+            Schema::create('reminder_logs', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('booking_id')->constrained()->cascadeOnDelete();
+                $table->enum('channel', ['whatsapp', 'sms', 'email']);
+                $table->timestamp('sent_at')->nullable();
+                $table->string('status')->nullable();
+                $table->text('response')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**

@@ -11,23 +11,25 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('bookings', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('employee_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('service_id')->constrained()->cascadeOnDelete();
-            $table->decimal('price', 8, 2)->default(0);
-            $table->string('customer_name');
-            $table->string('customer_phone');
-            $table->string('customer_email')->nullable();
-            $table->dateTime('starts_at');
-            $table->dateTime('ends_at');
-            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'no_show'])->default('pending');
-            $table->timestamp('reminder_sent_at')->nullable();
-            $table->timestamp('confirmation_received_at')->nullable();
-            $table->text('notes')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('bookings')) {
+            Schema::create('bookings', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('employee_id')->constrained()->cascadeOnDelete();
+                $table->foreignId('service_id')->constrained()->cascadeOnDelete();
+                $table->decimal('price', 8, 2)->default(0);
+                $table->string('customer_name');
+                $table->string('customer_phone');
+                $table->string('customer_email')->nullable();
+                $table->dateTime('starts_at');
+                $table->dateTime('ends_at');
+                $table->enum('status', ['pending', 'confirmed', 'cancelled', 'no_show'])->default('pending');
+                $table->timestamp('reminder_sent_at')->nullable();
+                $table->timestamp('confirmation_received_at')->nullable();
+                $table->text('notes')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**

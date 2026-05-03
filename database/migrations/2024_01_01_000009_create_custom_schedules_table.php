@@ -8,19 +8,21 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('custom_schedules', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('employee_id')->constrained()->cascadeOnDelete();
-            $table->date('date');
-            $table->time('open_time')->nullable();
-            $table->time('close_time')->nullable();
-            $table->time('break_start')->nullable();
-            $table->time('break_end')->nullable();
-            $table->boolean('is_closed')->default(false);
-            $table->timestamps();
+        if (!Schema::hasTable('custom_schedules')) {
+            Schema::create('custom_schedules', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('employee_id')->constrained()->cascadeOnDelete();
+                $table->date('date');
+                $table->time('open_time')->nullable();
+                $table->time('close_time')->nullable();
+                $table->time('break_start')->nullable();
+                $table->time('break_end')->nullable();
+                $table->boolean('is_closed')->default(false);
+                $table->timestamps();
 
-            $table->unique(['employee_id', 'date']);
-        });
+                $table->unique(['employee_id', 'date']);
+            });
+        }
     }
 
     public function down(): void

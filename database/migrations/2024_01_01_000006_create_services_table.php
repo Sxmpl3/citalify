@@ -11,16 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('services', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('name');
-            $table->unsignedInteger('duration_minutes');
-            $table->decimal('price', 8, 2)->default(0);
-            $table->string('color')->default('#10B981');
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('services')) {
+            Schema::create('services', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+                $table->string('name');
+                $table->unsignedInteger('duration_minutes');
+                $table->decimal('price', 8, 2)->default(0);
+                $table->string('color')->default('#10B981');
+                $table->boolean('is_active')->default(true);
+                $table->timestamps();
+            });
+        }
     }
 
     /**
