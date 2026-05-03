@@ -22,7 +22,7 @@ class CheckoutController extends Controller
         $checkout_session = Session::create([
             'payment_method_types' => ['card'],
             'line_items' => [[
-                'price' => 'price_1TSvGRAmHMeZ8eQoxSDLSjDE',
+                'price' => env('STRIPE_PRICE_BASIC'),
                 'quantity' => 1,
             ]],
             'mode' => 'subscription',
@@ -49,6 +49,7 @@ class CheckoutController extends Controller
                 if ($session->payment_status === 'paid' || $session->status === 'complete') {
                     $updateData = [
                         'stripe_customer_id' => $session->customer,
+                        'stripe_subscription_id' => $session->subscription,
                         'plan_id' => \App\Models\Plan::where('slug', 'basico')->first()?->id ?? \App\Models\Plan::first()?->id ?? null,
                     ];
 

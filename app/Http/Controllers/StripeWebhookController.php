@@ -67,6 +67,7 @@ class StripeWebhookController extends Controller
             if ($user) {
                 $user->update([
                     'stripe_customer_id' => $customerId,
+                    'stripe_subscription_id' => $session->subscription,
                     'trial_ends_at' => now()->addDays(30), // La prueba configurada en Stripe o en local
                     'plan_id' => \App\Models\Plan::where('slug', 'basico')->first()?->id ?? \App\Models\Plan::first()?->id ?? null,
                 ]);
