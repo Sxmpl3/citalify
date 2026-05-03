@@ -24,6 +24,10 @@ class PublicBookingController extends Controller
             ->where('onboarding_completed', true)
             ->firstOrFail();
 
+        if (is_null($business->plan_id)) {
+            return view('booking.inactive', compact('business'));
+        }
+
         // Se eliminó la vista de owner. El dueño verá su página pública normalmente.
 
         $services = $business->services()->where('is_active', true)->get();
@@ -143,6 +147,10 @@ class PublicBookingController extends Controller
             ->where('onboarding_completed', true)
             ->firstOrFail();
 
+        if (is_null($business->plan_id)) {
+            return response()->json([]);
+        }
+
         $service = Service::where('id', $request->service_id)
             ->where('user_id', $business->id)
             ->where('is_active', true)
@@ -250,6 +258,10 @@ class PublicBookingController extends Controller
             ->where('onboarding_completed', true)
             ->firstOrFail();
 
+        if (is_null($business->plan_id)) {
+            return response()->json([]);
+        }
+
         $service = Service::where('id', $request->service_id)
             ->where('user_id', $business->id)
             ->where('is_active', true)
@@ -333,6 +345,10 @@ class PublicBookingController extends Controller
             ->where('onboarding_completed', true)
             ->firstOrFail();
 
+        if (is_null($business->plan_id)) {
+            return back()->withErrors(['error' => 'El negocio se encuentra inactivo actualmente.']);
+        }
+
         $data = $request->validate([
             'service_id'     => ['required', 'integer', 'exists:services,id'],
             'date'           => ['required', 'date', 'after_or_equal:today'],
@@ -407,9 +423,13 @@ class PublicBookingController extends Controller
         return redirect()->route('booking.verify', [$slug, $pending->id]);
     }
 
-    public function showVerify(string $slug, PendingBooking $pending_booking): View
+    public function showVerify(string $slug, PendingBooking $pending_booking): View|RedirectResponse
     {
         $business = User::where('business_slug', $slug)->firstOrFail();
+        
+        if (is_null($business->plan_id)) {
+            return redirect()->route('booking.show', $slug);
+        }
         
         abort_if($pending_booking->isExpired(), 404, 'El tiempo de reserva ha expirado.');
         
@@ -421,6 +441,10 @@ class PublicBookingController extends Controller
     public function verifyCode(string $slug, Request $request, PendingBooking $pending_booking): RedirectResponse
     {
         $business = User::where('business_slug', $slug)->firstOrFail();
+
+        if (is_null($business->plan_id)) {
+            return redirect()->route('booking.show', $slug);
+        }
 
         if ($pending_booking->isExpired()) {
             return redirect()->route('booking.show', $slug)
@@ -463,6 +487,10 @@ class PublicBookingController extends Controller
         $business = User::where('business_slug', $slug)
             ->where('onboarding_completed', true)
             ->firstOrFail();
+
+        if (is_null($business->plan_id)) {
+            return redirect()->route('booking.show', $slug);
+        }
 
         return view('booking.confirmed', compact('business'));
     }

@@ -17,7 +17,11 @@ class EnsureOnboardingComplete
     {
         $user = $request->user();
 
-        if ($user && ! $user->onboarding_completed && ! $request->routeIs('onboarding.*') && ! $request->routeIs('logout')) {
+        if ($user && ! $user->trial_ends_at && ! $request->routeIs('checkout.*') && ! $request->routeIs('stripe.*') && ! $request->routeIs('logout')) {
+            return redirect()->route('checkout.redirect');
+        }
+
+        if ($user && ! $user->onboarding_completed && ! $request->routeIs('onboarding.*') && ! $request->routeIs('checkout.*') && ! $request->routeIs('stripe.*') && ! $request->routeIs('logout')) {
             return redirect()->route('onboarding.step', 1);
         }
 

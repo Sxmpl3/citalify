@@ -9,6 +9,9 @@ use App\Http\Controllers\ServiceController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
     return view('welcome');
 });
 
@@ -49,6 +52,14 @@ Route::middleware(['auth', 'verified'])->prefix('onboarding')->name('onboarding.
     Route::post('/2', [OnboardingController::class, 'storeStep2'])->name('store2');
     Route::post('/3', [OnboardingController::class, 'storeStep3'])->name('store3');
 });
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/checkout', [\App\Http\Controllers\CheckoutController::class, 'redirect'])->name('checkout.redirect');
+    Route::get('/checkout/success', [\App\Http\Controllers\CheckoutController::class, 'success'])->name('checkout.success');
+    Route::post('/subscription/cancel', [\App\Http\Controllers\SubscriptionController::class, 'cancel'])->name('subscription.cancel');
+});
+
+Route::post('/stripe/webhook', [\App\Http\Controllers\StripeWebhookController::class, 'handle'])->name('stripe.webhook');
 
 require __DIR__.'/auth.php';
 

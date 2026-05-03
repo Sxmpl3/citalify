@@ -459,7 +459,7 @@
                 <h3 class="font-bold text-xl mb-2 text-slate-800">Básico</h3>
                 <p class="text-sm mb-6 text-slate-600">Para autónomos con agenda personal</p>
                 <div class="mb-8">
-                    <span class="font-display text-5xl font-bold text-slate-800">6,99€</span>
+                    <span class="font-display text-5xl font-bold text-slate-800">9,99€</span>
                     <span class="text-sm text-slate-500">/mes</span>
                 </div>
                 <ul class="space-y-4 text-sm mb-8 text-slate-600 flex-1">
@@ -514,7 +514,7 @@
             <span class="text-emerald-400">2 horas a la semana?</span>
         </h2>
         <p class="text-lg mb-10 text-slate-400">
-            Con citalify dejas de gestionar citas por teléfono, reduces las ausencias y tienes control total de tu agenda. Desde 6,99€ al mes.
+            Con citalify dejas de gestionar citas por teléfono, reduces las ausencias y tienes control total de tu agenda. Desde 9,99€ al mes.
         </p>
         <a href="{{ route('register') }}" class="btn-primary inline-block px-10 py-4 text-lg rounded-xl">
             Prueba 30 días gratis

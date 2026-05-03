@@ -37,14 +37,12 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        $proPlan = Plan::where('slug', 'pro')->first();
-
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'plan_id' => $proPlan?->id,
-            'trial_ends_at' => now()->addDays(30),
+            'plan_id' => null,
+            'trial_ends_at' => null,
             'onboarding_completed' => false,
         ]);
 
@@ -52,6 +50,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect()->route('onboarding.step', 1);
+        return redirect()->route('checkout.redirect');
     }
 }
