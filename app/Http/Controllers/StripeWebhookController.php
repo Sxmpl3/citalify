@@ -50,6 +50,15 @@ class StripeWebhookController extends Controller
                 $invoice = $event->data->object;
                 $this->handleInvoicePaymentSucceeded($invoice);
                 break;
+            case 'customer.subscription.deleted':
+            case 'customer.subscription.updated':
+                $subscription = $event->data->object;
+                $this->handleSubscriptionDeletedOrUpdated($subscription);
+                break;
+            case 'invoice.payment_failed':
+                $invoice = $event->data->object;
+                $this->handleInvoicePaymentFailed($invoice);
+                break;
             default:
                 Log::info('Received unknown event type ' . $event->type);
         }
@@ -106,6 +115,36 @@ class StripeWebhookController extends Controller
                     \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\InvoiceMail($user, $invoiceData, $pdfContent));
                 }
             }
+        }
+    }
+
+    protected function handleSubscriptionDeletedOrUpdated($subscription)
+    {
+        $customerId = $subscription->customer;
+        $user = User::where('stripe_customer_id', $customerId)->first();
+
+        if ($user) {
+            // Si la suscripción está cancelada, impagada o en mora, quitamos el plan
+            if (in_array($subscription->status, ['canceled', 'unpaid', 'past_due', 'incomplete_expired'])) {
+                $user->update([
+                    'plan_id' => null,
+                    'stripe_subscription_id' => null,
+                ]);
+                Log::info("Acceso restringido (suscripción {$subscription->status}) para el usuario: {$user->id}");
+            }
+        }
+    }
+
+    protected function handleInvoicePaymentFailed($invoice)
+    {
+        $customerId = $invoice->customer;
+        $user = User::where('stripe_customer_id', $customerId)->first();
+
+        if ($user) {
+            $user->update([
+                'plan_id' => null,
+            ]);
+            Log::error("Pago de factura fallido para el usuario: {$user->id}. Acceso revocado.");
         }
     }
 }
