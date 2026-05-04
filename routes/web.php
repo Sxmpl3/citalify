@@ -15,7 +15,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/auto-login', function () { auth()->loginUsingId(4); return redirect('/dashboard'); });
+#Route::get('/auto-login', function () { auth()->loginUsingId(4); return redirect('/dashboard'); });
 
 Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
