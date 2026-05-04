@@ -196,6 +196,7 @@ class DashboardController extends Controller
             }
         }
 
+        return back()->with('success', 'Horario actualizado correctamente.');
     }
 
     public function updateWeeklySchedule(Request $request): \Illuminate\Http\RedirectResponse
