@@ -143,6 +143,8 @@ class DashboardController extends Controller
             'is_closed' => ['required', 'boolean'],
             'open_time' => ['nullable', 'date_format:H:i'],
             'close_time' => ['nullable', 'date_format:H:i', 'after:open_time'],
+            'break_start' => ['nullable', 'date_format:H:i'],
+            'break_end' => ['nullable', 'date_format:H:i', 'after:break_start'],
         ]);
 
         $employee = $user->employees()->first();
@@ -157,6 +159,8 @@ class DashboardController extends Controller
                     'is_closed' => $data['is_closed'],
                     'open_time' => $data['is_closed'] ? null : ($data['open_time'] ?? null),
                     'close_time' => $data['is_closed'] ? null : ($data['close_time'] ?? null),
+                    'break_start' => $data['is_closed'] ? null : ($data['break_start'] ?? null),
+                    'break_end' => $data['is_closed'] ? null : ($data['break_end'] ?? null),
                 ]);
             } else {
                 $employee->customSchedules()->create([
@@ -164,6 +168,8 @@ class DashboardController extends Controller
                     'is_closed' => $data['is_closed'],
                     'open_time' => $data['is_closed'] ? null : ($data['open_time'] ?? null),
                     'close_time' => $data['is_closed'] ? null : ($data['close_time'] ?? null),
+                    'break_start' => $data['is_closed'] ? null : ($data['break_start'] ?? null),
+                    'break_end' => $data['is_closed'] ? null : ($data['break_end'] ?? null),
                 ]);
             }
 

@@ -92,11 +92,23 @@ class PublicBookingController extends Controller
                 }
             }
 
+            $breakStart = null;
+            $breakEnd = null;
+            if ($business->schedule_type === 'custom') {
+                $sch = $schedules->get($dateStr);
+                if ($sch && $sch->break_start) {
+                    $breakStart = Carbon::parse($sch->break_start)->format('H:i');
+                    $breakEnd = Carbon::parse($sch->break_end)->format('H:i');
+                }
+            }
+
             $days[]  = [
                 'date'   => $dateStr,
                 'status' => $status,
                 'open_time' => $openTime,
                 'close_time' => $closeTime,
+                'break_start' => $breakStart,
+                'break_end' => $breakEnd,
                 'count'  => $byDate->get($dateStr, collect())->count(),
             ];
         }

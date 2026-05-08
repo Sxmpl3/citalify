@@ -391,12 +391,34 @@
                                 x-text="modalOpen ? 'Abierto' : 'Cerrado'"></span>
                         </label>
 
-                        <div x-show="modalOpen" class="flex items-center gap-2">
-                            <input type="time" name="open_time" x-model="modalOpenTime"
-                                class="rounded-xl border-slate-300 text-sm focus:border-emerald-500 w-full">
-                            <span class="text-gray-400 text-sm">a</span>
-                            <input type="time" name="close_time" x-model="modalCloseTime"
-                                class="rounded-xl border-slate-300 text-sm focus:border-emerald-500 w-full">
+                        <div x-show="modalOpen" class="space-y-3">
+                            <div class="flex items-center gap-2">
+                                <input type="time" name="open_time" x-model="modalOpenTime"
+                                    class="rounded-xl border-slate-300 text-sm focus:border-emerald-500 w-full">
+                                <span class="text-gray-400 text-sm">a</span>
+                                <input type="time" name="close_time" x-model="modalCloseTime"
+                                    class="rounded-xl border-slate-300 text-sm focus:border-emerald-500 w-full">
+                            </div>
+
+                            <label class="flex items-center gap-3 cursor-pointer select-none py-2 px-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <div class="relative">
+                                    <input type="checkbox" x-model="modalHasBreak" class="sr-only">
+                                    <div class="w-8 h-4 rounded-full transition-colors"
+                                         :class="modalHasBreak ? 'bg-amber-500' : 'bg-slate-300'"></div>
+                                    <div class="absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full shadow transition-transform"
+                                         :class="modalHasBreak ? 'translate-x-4' : 'translate-x-0'"></div>
+                                </div>
+                                <span class="text-xs font-bold" :class="modalHasBreak ? 'text-amber-600' : 'text-slate-500'">Añadir descanso</span>
+                            </label>
+
+                            <div x-show="modalHasBreak" class="flex items-center gap-2 pl-1">
+                                <span class="text-xs text-amber-600 font-medium">Descanso:</span>
+                                <input type="time" name="break_start" x-model="modalBreakStart"
+                                    class="rounded-xl border-amber-200 text-sm focus:border-amber-500 w-full text-amber-700">
+                                <span class="text-gray-400 text-sm">a</span>
+                                <input type="time" name="break_end" x-model="modalBreakEnd"
+                                    class="rounded-xl border-amber-200 text-sm focus:border-amber-500 w-full text-amber-700">
+                            </div>
                         </div>
 
                         <div class="pt-2 flex justify-end gap-3 mt-6">
@@ -651,6 +673,9 @@
                         modalOpen: true,
                         modalOpenTime: '09:00',
                         modalCloseTime: '19:00',
+                        modalHasBreak: false,
+                        modalBreakStart: '14:00',
+                        modalBreakEnd: '15:00',
                         bookingToCancel: null,
 
                         // Nueva Cita Manual
@@ -737,6 +762,9 @@
                                 this.modalOpen = this.selectedDayRef.status === 'open';
                                 this.modalOpenTime = this.selectedDayRef.open_time || '09:00';
                                 this.modalCloseTime = this.selectedDayRef.close_time || '19:00';
+                                this.modalHasBreak = !!(this.selectedDayRef.break_start && this.selectedDayRef.break_end);
+                                this.modalBreakStart = this.selectedDayRef.break_start || '14:00';
+                                this.modalBreakEnd = this.selectedDayRef.break_end || '15:00';
                             }
                             this.openConfigModal = true;
                         },
