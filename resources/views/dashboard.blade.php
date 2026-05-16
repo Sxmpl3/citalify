@@ -204,19 +204,20 @@
                     <p class="text-sm text-slate-500 mt-0.5">Vista de {{ auth()->user()->booking_days_ahead }} días. Haz
                         click en un día para ver y gestionar citas.</p>
                 </div>
-                <div class="flex items-center gap-3 self-start sm:self-auto">
+                <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto">
                     @if(auth()->user()->schedule_type === 'normal')
                         <a href="{{ route('schedule.edit') }}"
-                            class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm">
-                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all shadow-sm">
+                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            Configurar Horario
+                            <span class="sm:hidden">Horario</span>
+                            <span class="hidden sm:inline">Configurar Horario</span>
                         </a>
                         <a href="{{ route('vacations.index') }}"
-                            class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-rose-600 bg-white border border-rose-200 rounded-xl hover:bg-rose-50 transition-all shadow-sm">
-                            <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium text-rose-600 bg-white border border-rose-200 rounded-xl hover:bg-rose-50 transition-all shadow-sm">
+                            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-rose-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -226,7 +227,7 @@
                         </a>
                     @endif
                     <button @click="openAddModal = true"
-                        class="bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-md shadow-emerald-900/20 px-4 py-2.5 text-sm font-medium rounded-xl shrink-0 transition-transform hover:scale-105">
+                        class="flex-1 sm:flex-initial flex items-center justify-center bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-md shadow-emerald-900/20 px-2 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-xl transition-transform hover:scale-105 whitespace-nowrap">
                         + Nueva cita
                     </button>
                 </div>
