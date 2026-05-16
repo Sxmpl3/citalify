@@ -6,6 +6,7 @@ use App\Models\Booking;
 use App\Models\Employee;
 use App\Models\Service;
 use App\Models\User;
+use App\Models\Vacation;
 use App\Models\PendingBooking;
 use App\Mail\BookingOtpMail;
 use App\Mail\BookingConfirmationMail;
@@ -46,14 +47,21 @@ class PublicBookingController extends Controller
         $rangeEnd = $today->copy()->addDays($daysAhead);
 
         $employee  = $business->employees()->first();
-        
+
         if ($business->schedule_type === 'custom') {
             $schedules = $employee ? $employee->customSchedules()
                 ->where('date', '>=', $today->toDateString())
                 ->where('date', '<', $rangeEnd->toDateString())
                 ->get()->keyBy(fn($s) => $s->date->toDateString()) : collect();
+            $vacationDates = collect();
         } else {
             $schedules = $employee ? $employee->schedules->keyBy('day_of_week') : collect();
+            $vacationDates = $business->vacations()
+                ->where('date', '>=', $today->toDateString())
+                ->where('date', '<', $rangeEnd->toDateString())
+                ->pluck('date')
+                ->map(fn($d) => Carbon::parse($d)->toDateString())
+                ->flip();
         }
 
         $bookings = $employee
@@ -84,7 +92,9 @@ class PublicBookingController extends Controller
                     if ($sch->close_time) $closeTime = Carbon::parse($sch->close_time)->format('H:i');
                 }
             } else {
-                if ($schedules->has($date->dayOfWeek)) {
+                if ($vacationDates->has($dateStr)) {
+                    $status = 'closed';
+                } elseif ($schedules->has($date->dayOfWeek)) {
                     $status = 'open';
                     $sch = $schedules->get($date->dayOfWeek);
                     $openTime = Carbon::parse($sch->open_time)->format('H:i');
@@ -191,8 +201,15 @@ class PublicBookingController extends Controller
                 ->where('date', '>=', $today->toDateString())
                 ->where('date', '<', $rangeEnd->toDateString())
                 ->get()->keyBy(fn($s) => $s->date->toDateString());
+            $vacationDates = collect();
         } else {
             $schedules = $employee->schedules->keyBy('day_of_week');
+            $vacationDates = $business->vacations()
+                ->where('date', '>=', $today->toDateString())
+                ->where('date', '<', $rangeEnd->toDateString())
+                ->pluck('date')
+                ->map(fn($d) => Carbon::parse($d)->toDateString())
+                ->flip();
         }
 
         $bookings = Booking::where('employee_id', $employee->id)
@@ -221,6 +238,10 @@ class PublicBookingController extends Controller
                     continue;
                 }
             } else {
+                if ($vacationDates->has($dateStr)) {
+                    $days[] = ['date' => $dateStr, 'status' => 'closed'];
+                    continue;
+                }
                 $schedule  = $schedules->get($date->dayOfWeek);
                 if (!$schedule) {
                     $days[] = ['date' => $dateStr, 'status' => 'closed'];
@@ -301,6 +322,12 @@ class PublicBookingController extends Controller
                 return response()->json([]);
             }
         } else {
+            $isVacation = $business->vacations()
+                ->whereDate('date', $date->toDateString())
+                ->exists();
+            if ($isVacation) {
+                return response()->json([]);
+            }
             $schedule = $employee->schedules()->where('day_of_week', $dayOfWeek)->first();
             if (!$schedule) {
                 return response()->json([]);
@@ -393,6 +420,17 @@ class PublicBookingController extends Controller
         $tz       = $business->timezone ?? 'Europe/Madrid';
         $startsAt = Carbon::parse($data['date'] . ' ' . $data['time'], $tz);
         $endsAt   = $startsAt->copy()->addMinutes($service->duration_minutes);
+
+        if ($business->schedule_type === 'normal') {
+            $isVacation = $business->vacations()
+                ->whereDate('date', $startsAt->toDateString())
+                ->exists();
+            if ($isVacation) {
+                return back()
+                    ->withErrors(['date' => 'Este día no está disponible para reservas.'])
+                    ->withInput();
+            }
+        }
 
         // Final conflict check (comparar en UTC para evitar errores de timezone)
         $conflictBody = Booking::where('employee_id', $employee->id)

@@ -68,6 +68,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Booking::class);
     }
 
+    public function vacations(): HasMany
+    {
+        return $this->hasMany(Vacation::class);
+    }
+
     public function isOnTrial(): bool
     {
         return $this->trial_ends_at !== null && $this->trial_ends_at->isFuture();

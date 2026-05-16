@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicBookingController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\VacationController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -24,6 +25,10 @@ Route::middleware(['auth', 'verified', 'onboarding'])->group(function () {
 
     Route::get('/horario',  [ScheduleController::class, 'edit'])->name('schedule.edit');
     Route::put('/horario',  [ScheduleController::class, 'update'])->name('schedule.update');
+
+    Route::get('/vacaciones',                   [VacationController::class, 'index'])->name('vacations.index');
+    Route::post('/vacaciones',                  [VacationController::class, 'store'])->name('vacations.store');
+    Route::delete('/vacaciones/{vacation}',     [VacationController::class, 'destroy'])->name('vacations.destroy');
     Route::post('/dashboard/citas', [DashboardController::class, 'storeManual'])->name('dashboard.bookings.store');
     Route::delete('/dashboard/citas/{booking}', [DashboardController::class, 'cancel'])->name('dashboard.bookings.cancel');
     Route::patch('/dashboard/citas/{booking}/confirm', [DashboardController::class, 'confirm'])->name('dashboard.bookings.confirm');
