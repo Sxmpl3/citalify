@@ -48,20 +48,19 @@ class PublicBookingController extends Controller
 
         $employee  = $business->employees()->first();
 
+        $vacationByDate = collect();
         if ($business->schedule_type === 'custom') {
             $schedules = $employee ? $employee->customSchedules()
                 ->where('date', '>=', $today->toDateString())
                 ->where('date', '<', $rangeEnd->toDateString())
                 ->get()->keyBy(fn($s) => $s->date->toDateString()) : collect();
-            $vacationDates = collect();
         } else {
             $schedules = $employee ? $employee->schedules->keyBy('day_of_week') : collect();
-            $vacationDates = $business->vacations()
-                ->where('date', '>=', $today->toDateString())
-                ->where('date', '<', $rangeEnd->toDateString())
-                ->pluck('date')
-                ->map(fn($d) => Carbon::parse($d)->toDateString())
-                ->flip();
+            $vacationByDate = $this->vacationsByDate(
+                $business,
+                $today->toDateString(),
+                $rangeEnd->toDateString()
+            );
         }
 
         $bookings = $employee
@@ -80,10 +79,11 @@ class PublicBookingController extends Controller
         for ($i = 0; $i < $daysAhead; $i++) {
             $date    = $today->copy()->addDays($i);
             $dateStr = $date->toDateString();
-            
+
             $status = 'closed';
             $openTime = '09:00';
             $closeTime = '19:00';
+            $vacationRanges = [];
             if ($business->schedule_type === 'custom') {
                 $sch = $schedules->get($dateStr);
                 if ($sch) {
@@ -92,13 +92,17 @@ class PublicBookingController extends Controller
                     if ($sch->close_time) $closeTime = Carbon::parse($sch->close_time)->format('H:i');
                 }
             } else {
-                if ($vacationDates->has($dateStr)) {
+                $vac = $vacationByDate->get($dateStr);
+                if ($vac && $vac['full']) {
                     $status = 'closed';
                 } elseif ($schedules->has($date->dayOfWeek)) {
                     $status = 'open';
                     $sch = $schedules->get($date->dayOfWeek);
                     $openTime = Carbon::parse($sch->open_time)->format('H:i');
                     $closeTime = Carbon::parse($sch->close_time)->format('H:i');
+                    if ($vac) {
+                        $vacationRanges = $vac['ranges'];
+                    }
                 }
             }
 
@@ -119,11 +123,36 @@ class PublicBookingController extends Controller
                 'close_time' => $closeTime,
                 'break_start' => $breakStart,
                 'break_end' => $breakEnd,
+                'vacation_ranges' => $vacationRanges,
                 'count'  => $byDate->get($dateStr, collect())->count(),
             ];
         }
 
         return response()->json($days);
+    }
+
+    /**
+     * Build a per-date map of vacation status:
+     *   $dateStr => ['full' => bool, 'ranges' => [['start'=>'HH:MM:SS','end'=>'HH:MM:SS'], ...]]
+     * Date bounds use Y-m-d strings; the upper bound is exclusive to match the existing query style.
+     */
+    private function vacationsByDate(User $business, string $fromDate, string $untilDate): \Illuminate\Support\Collection
+    {
+        $rows = $business->vacations()
+            ->where('date', '>=', $fromDate)
+            ->where('date', '<', $untilDate)
+            ->get();
+
+        return $rows->groupBy(fn($v) => Carbon::parse($v->date)->toDateString())
+            ->map(function ($items) {
+                $full   = $items->contains(fn($v) => $v->start_time === null && $v->end_time === null);
+                $ranges = $items
+                    ->filter(fn($v) => $v->start_time !== null && $v->end_time !== null)
+                    ->map(fn($v) => ['start' => $v->start_time, 'end' => $v->end_time])
+                    ->values()
+                    ->all();
+                return ['full' => $full, 'ranges' => $ranges];
+            });
     }
 
     public function dayBookings(string $slug, Request $request): JsonResponse
@@ -196,20 +225,19 @@ class PublicBookingController extends Controller
         }
 
         // Precargar horarios y reservas del período
+        $vacationByDate = collect();
         if ($business->schedule_type === 'custom') {
             $schedules = $employee->customSchedules()
                 ->where('date', '>=', $today->toDateString())
                 ->where('date', '<', $rangeEnd->toDateString())
                 ->get()->keyBy(fn($s) => $s->date->toDateString());
-            $vacationDates = collect();
         } else {
             $schedules = $employee->schedules->keyBy('day_of_week');
-            $vacationDates = $business->vacations()
-                ->where('date', '>=', $today->toDateString())
-                ->where('date', '<', $rangeEnd->toDateString())
-                ->pluck('date')
-                ->map(fn($d) => Carbon::parse($d)->toDateString())
-                ->flip();
+            $vacationByDate = $this->vacationsByDate(
+                $business,
+                $today->toDateString(),
+                $rangeEnd->toDateString()
+            );
         }
 
         $bookings = Booking::where('employee_id', $employee->id)
@@ -231,6 +259,7 @@ class PublicBookingController extends Controller
             $date      = $today->copy()->addDays($i);
             $dateStr   = $date->toDateString();
             
+            $vacationRanges = [];
             if ($business->schedule_type === 'custom') {
                 $schedule = $schedules->get($dateStr);
                 if (!$schedule || $schedule->is_closed) {
@@ -238,7 +267,8 @@ class PublicBookingController extends Controller
                     continue;
                 }
             } else {
-                if ($vacationDates->has($dateStr)) {
+                $vac = $vacationByDate->get($dateStr);
+                if ($vac && $vac['full']) {
                     $days[] = ['date' => $dateStr, 'status' => 'closed'];
                     continue;
                 }
@@ -247,12 +277,24 @@ class PublicBookingController extends Controller
                     $days[] = ['date' => $dateStr, 'status' => 'closed'];
                     continue;
                 }
+                if ($vac) {
+                    $vacationRanges = $vac['ranges'];
+                }
             }
 
             $open   = Carbon::parse($date->toDateString() . ' ' . $schedule->open_time, $tz);
             $close  = Carbon::parse($date->toDateString() . ' ' . $schedule->close_time, $tz);
             $breakStart = $schedule->break_start ? Carbon::parse($date->toDateString() . ' ' . $schedule->break_start, $tz) : null;
             $breakEnd   = $schedule->break_end   ? Carbon::parse($date->toDateString() . ' ' . $schedule->break_end,   $tz) : null;
+
+            $vacationWindows = array_map(
+                fn($r) => [
+                    Carbon::parse($date->toDateString() . ' ' . $r['start'], $tz),
+                    Carbon::parse($date->toDateString() . ' ' . $r['end'],   $tz),
+                ],
+                $vacationRanges
+            );
+
             $cursor = $open->copy();
             $hasSlot = false;
 
@@ -261,6 +303,19 @@ class PublicBookingController extends Controller
 
                 // Skip slots that overlap with the break
                 if ($breakStart && $breakEnd && $cursor->lt($breakEnd) && $slotEnd->gt($breakStart)) {
+                    $cursor->addMinutes($duration);
+                    continue;
+                }
+
+                // Skip slots overlapping any vacation time range
+                $hitsVacation = false;
+                foreach ($vacationWindows as [$vStart, $vEnd]) {
+                    if ($cursor->lt($vEnd) && $slotEnd->gt($vStart)) {
+                        $hitsVacation = true;
+                        break;
+                    }
+                }
+                if ($hitsVacation) {
                     $cursor->addMinutes($duration);
                     continue;
                 }
@@ -316,22 +371,30 @@ class PublicBookingController extends Controller
         }
 
         $schedule = null;
+        $vacationWindows = [];
         if ($business->schedule_type === 'custom') {
             $schedule = $employee->customSchedules()->whereDate('date', $date->toDateString())->first();
             if (!$schedule || $schedule->is_closed) {
                 return response()->json([]);
             }
         } else {
-            $isVacation = $business->vacations()
+            $vacations = $business->vacations()
                 ->whereDate('date', $date->toDateString())
-                ->exists();
-            if ($isVacation) {
+                ->get();
+            if ($vacations->contains(fn($v) => $v->start_time === null && $v->end_time === null)) {
                 return response()->json([]);
             }
             $schedule = $employee->schedules()->where('day_of_week', $dayOfWeek)->first();
             if (!$schedule) {
                 return response()->json([]);
             }
+            $vacationWindows = $vacations
+                ->filter(fn($v) => $v->start_time && $v->end_time)
+                ->map(fn($v) => [
+                    Carbon::parse($date->toDateString() . ' ' . $v->start_time, $tz),
+                    Carbon::parse($date->toDateString() . ' ' . $v->end_time,   $tz),
+                ])
+                ->all();
         }
 
         $open     = Carbon::parse($date->toDateString() . ' ' . $schedule->open_time, $tz);
@@ -349,6 +412,19 @@ class PublicBookingController extends Controller
 
             // Skip slots that overlap with the break window
             if ($breakStart && $breakEnd && $cursor->lt($breakEnd) && $slotEnd->gt($breakStart)) {
+                $cursor->addMinutes($duration);
+                continue;
+            }
+
+            // Skip slots overlapping any vacation time range
+            $hitsVacation = false;
+            foreach ($vacationWindows as [$vStart, $vEnd]) {
+                if ($cursor->lt($vEnd) && $slotEnd->gt($vStart)) {
+                    $hitsVacation = true;
+                    break;
+                }
+            }
+            if ($hitsVacation) {
                 $cursor->addMinutes($duration);
                 continue;
             }
@@ -422,12 +498,22 @@ class PublicBookingController extends Controller
         $endsAt   = $startsAt->copy()->addMinutes($service->duration_minutes);
 
         if ($business->schedule_type === 'normal') {
-            $isVacation = $business->vacations()
+            $vacations = $business->vacations()
                 ->whereDate('date', $startsAt->toDateString())
-                ->exists();
-            if ($isVacation) {
+                ->get();
+
+            $blocked = $vacations->contains(function ($v) use ($startsAt, $endsAt, $tz) {
+                if ($v->start_time === null && $v->end_time === null) {
+                    return true;
+                }
+                $vStart = Carbon::parse($startsAt->toDateString() . ' ' . $v->start_time, $tz);
+                $vEnd   = Carbon::parse($startsAt->toDateString() . ' ' . $v->end_time,   $tz);
+                return $startsAt->lt($vEnd) && $endsAt->gt($vStart);
+            });
+
+            if ($blocked) {
                 return back()
-                    ->withErrors(['date' => 'Este día no está disponible para reservas.'])
+                    ->withErrors(['date' => 'Este horario no está disponible para reservas.'])
                     ->withInput();
             }
         }
