@@ -33,6 +33,19 @@ class ScheduleController extends Controller
 
         abort_if($user->schedule_type !== 'normal', 400, 'Solo disponible en Horario Normal');
 
+        if (is_array($request->input('schedules'))) {
+            $request->merge([
+                'schedules' => collect($request->input('schedules'))->map(function ($sch) {
+                    foreach (['open', 'close', 'break_start', 'break_end'] as $k) {
+                        if (isset($sch[$k]) && is_string($sch[$k]) && strlen($sch[$k]) > 5) {
+                            $sch[$k] = substr($sch[$k], 0, 5);
+                        }
+                    }
+                    return $sch;
+                })->all(),
+            ]);
+        }
+
         $request->validate([
             'schedules'               => ['required', 'array'],
             'schedules.*.day'         => ['required', 'integer', 'between:0,6'],
